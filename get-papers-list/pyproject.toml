@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "get-papers-list"
+version = "0.1.0"
+description = "CLI tool to find research papers with non-academic authors from PubMed"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "paper_finder"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.31"
+typer = "^0.12"
+pandas = "^2.2"
+lxml = "^5.2"
+rich = "^13.7"
+
+[tool.poetry.scripts]
+get-papers-list = "cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
