@@ -11,6 +11,18 @@ This project was developed as part of a backend engineering assessment. The goal
 - Export results in a structured CSV format
 - Provide both file output and console display options
 
+## Quick Start
+
+```bash
+# Clone and run in 3 commands
+git clone https://github.com/Maniredii/Aganitha-Test.git
+cd Aganitha-Test/get-papers-list
+pip install -r requirements.txt
+
+# Run your first search
+python cli.py "cancer therapy" --max-results 5
+```
+
 ## How the Code is Organized
 
 The project follows a modular architecture with clear separation between the core library and command-line interface:
@@ -52,22 +64,34 @@ The code is organized around these principles:
 ### Prerequisites
 
 - Python 3.9 or higher
+- Git (for cloning the repository)
 - Internet connection for PubMed API access
 
-### Option 1: Using Poetry (Recommended)
+### Step 1: Clone the Repository
+
+```bash
+# Clone the repository
+git clone https://github.com/Maniredii/Aganitha-Test.git
+
+# Navigate to the project directory
+cd Aganitha-Test/get-papers-list
+```
+
+### Step 2: Install Dependencies
+
+#### Option A: Using Poetry (Recommended)
 
 1. **Install Poetry** (if not already installed):
    ```bash
    # Windows (PowerShell)
    (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
-   
+
    # macOS/Linux
    curl -sSL https://install.python-poetry.org | python3 -
    ```
 
 2. **Install Dependencies**:
    ```bash
-   cd get-papers-list
    poetry install
    ```
 
@@ -76,12 +100,11 @@ The code is organized around these principles:
    poetry run get-papers-list "your search query"
    ```
 
-### Option 2: Using pip
+#### Option B: Using pip
 
 1. **Install Dependencies**:
    ```bash
-   cd get-papers-list
-   pip install requests typer pandas lxml rich
+   pip install -r requirements.txt
    ```
 
 2. **Run the Tool**:
@@ -89,11 +112,26 @@ The code is organized around these principles:
    python cli.py "your search query"
    ```
 
+### Step 3: Verify Installation
+
+Test that everything is working correctly:
+
+```bash
+# Test help command
+python cli.py --help
+
+# Test with a simple query
+python cli.py "cancer therapy" --max-results 5
+```
+
 ## Usage Examples
 
 ### Basic Usage
 
 ```bash
+# After cloning and installing dependencies:
+cd Aganitha-Test/get-papers-list
+
 # Search for papers about cancer therapy
 python cli.py "cancer therapy"
 
@@ -193,6 +231,9 @@ The project was developed using standard software engineering practices:
 The project includes comprehensive tests to ensure reliability:
 
 ```bash
+# Navigate to project directory first
+cd Aganitha-Test/get-papers-list
+
 # Run unit tests
 python test_paper_finder.py
 
@@ -202,6 +243,35 @@ python test_cli.py
 # Run complete validation
 python validate_project.py
 ```
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: `ModuleNotFoundError` when running the tool
+**Solution**: Make sure you're in the correct directory and dependencies are installed:
+```bash
+cd Aganitha-Test/get-papers-list
+pip install -r requirements.txt
+```
+
+**Issue**: `git clone` fails
+**Solution**: Ensure Git is installed and you have internet access:
+```bash
+git --version  # Should show Git version
+```
+
+**Issue**: Python version compatibility
+**Solution**: Check your Python version (requires 3.9+):
+```bash
+python --version  # Should be 3.9 or higher
+```
+
+**Issue**: API rate limiting or timeouts
+**Solution**: The tool includes built-in rate limiting, but for large queries, consider:
+- Using smaller `--max-results` values
+- Adding your email with `--email your@email.com`
+- Running queries during off-peak hours
 
 ## Contributing
 

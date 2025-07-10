@@ -6,8 +6,8 @@ authors = ["Developer <dev@example.com>"]
 readme = "README.md"
 packages = [{include = "paper_finder"}]
 license = "MIT"
-homepage = "https://github.com/username/get-papers-list"
-repository = "https://github.com/username/get-papers-list"
+homepage = "https://github.com/Maniredii/Aganitha-Test"
+repository = "https://github.com/Maniredii/Aganitha-Test"
 keywords = ["pubmed", "research", "papers", "pharmaceutical", "biotech", "industry"]
 classifiers = [
     "Development Status :: 4 - Beta",
