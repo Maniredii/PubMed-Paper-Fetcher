@@ -11,6 +11,81 @@ A command-line tool to search PubMed for research papers and identify those with
 - 🐛 Debug mode for troubleshooting and understanding the filtering process
 - 📈 Rich CLI interface with progress indicators and result previews
 
+## Code Organization
+
+This project follows a modular architecture with clear separation between the library and CLI components:
+
+### Project Structure
+
+```
+get-papers-list/
+├── cli.py                   # Command-line interface (main entry point)
+├── paper_finder/            # Core library module
+│   ├── __init__.py         # Package initialization
+│   ├── fetch.py            # PubMed API interaction and data fetching
+│   ├── parser.py           # XML parsing and data structure definitions
+│   ├── filter.py           # Author affiliation filtering and scoring
+│   └── output.py           # CSV export and console output formatting
+├── pyproject.toml          # Poetry configuration and dependencies
+├── README.md               # This documentation
+├── SETUP_GUIDE.md          # Environment setup instructions
+├── PUBLISHING.md           # PyPI publishing guide
+└── .gitignore              # Git ignore patterns
+```
+
+### Module Responsibilities
+
+#### `cli.py` - Command Line Interface
+- **Purpose**: Main entry point for the application
+- **Functions**: Argument parsing, user interaction, progress display
+- **Dependencies**: Uses all `paper_finder` modules
+- **Key Features**: Typer-based CLI with rich formatting and error handling
+
+#### `paper_finder/fetch.py` - Data Fetching
+- **Purpose**: Interact with PubMed E-utilities API
+- **Classes**: `PubMedFetcher`
+- **Functions**: Search papers, fetch detailed information, handle API rate limiting
+- **External APIs**: NCBI E-utilities (esearch, efetch)
+
+#### `paper_finder/parser.py` - Data Parsing
+- **Purpose**: Parse XML responses and create structured data
+- **Classes**: `Paper`, `Author`, `PubMedParser`
+- **Functions**: XML parsing, data validation, object creation
+- **Data Structures**: Typed dataclasses for papers and authors
+
+#### `paper_finder/filter.py` - Author Classification
+- **Purpose**: Identify industry vs academic authors
+- **Classes**: `AffiliationFilter`
+- **Functions**: Keyword-based filtering, email domain analysis, scoring algorithms
+- **Logic**: Heuristic-based classification with configurable thresholds
+
+#### `paper_finder/output.py` - Data Export
+- **Purpose**: Export results in various formats
+- **Classes**: `CSVExporter`
+- **Functions**: CSV generation, console output, detailed reporting
+- **Formats**: Standard CSV, detailed CSV, console display
+
+### Design Principles
+
+1. **Separation of Concerns**: Each module has a single, well-defined responsibility
+2. **Modularity**: Library (`paper_finder`) can be used independently of CLI
+3. **Type Safety**: Comprehensive type hints throughout the codebase
+4. **Error Handling**: Robust error handling at each layer
+5. **Configurability**: Flexible parameters and options for different use cases
+
+### Data Flow
+
+```
+User Query → CLI → PubMedFetcher → PubMedParser → AffiliationFilter → CSVExporter → Output
+```
+
+1. **Input**: User provides search query via CLI
+2. **Search**: `PubMedFetcher` searches PubMed API for matching papers
+3. **Fetch**: Detailed paper information retrieved in batches
+4. **Parse**: `PubMedParser` converts XML to structured `Paper` objects
+5. **Filter**: `AffiliationFilter` identifies industry authors using heuristics
+6. **Export**: `CSVExporter` generates output in requested format
+
 ## Installation
 
 ### Prerequisites
@@ -238,7 +313,31 @@ To extend or modify the tool:
 
 This project is open source. Please respect NCBI's terms of service when using their APIs.
 
+## Tools and Resources Used
+
+This project was developed with assistance from the following tools and resources:
+
+### Development Tools
+- **Claude 3.5 Sonnet (Anthropic)**: AI assistant used for code generation, debugging, and documentation
+- **Augment Agent**: Agentic coding AI assistant with codebase context engine
+- **Poetry**: Python dependency management and packaging
+- **Typer**: Modern CLI framework for Python
+- **Rich**: Rich text and beautiful formatting in the terminal
+
+### Libraries and APIs
+- **NCBI E-utilities API**: For accessing PubMed data
+- **Pandas**: Data manipulation and CSV export
+- **Requests**: HTTP library for API calls
+- **lxml**: XML parsing for PubMed responses
+
+### Links
+- [NCBI E-utilities API Documentation](https://www.ncbi.nlm.nih.gov/books/NBK25497/)
+- [Typer Documentation](https://typer.tiangolo.com/)
+- [Poetry Documentation](https://python-poetry.org/docs/)
+- [Rich Documentation](https://rich.readthedocs.io/)
+
 ## Acknowledgments
 
 - NCBI for providing the PubMed E-utilities API
 - The scientific community for making research data accessible
+- Anthropic for Claude AI assistance in development

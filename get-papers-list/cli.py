@@ -19,23 +19,22 @@ from paper_finder.parser import PubMedParser
 from paper_finder.filter import AffiliationFilter
 from paper_finder.output import CSVExporter
 
-app = typer.Typer(
-    name="get-papers-list",
-    help="Find research papers with non-academic (industry) authors from PubMed",
-    add_completion=False
-)
-
 console = Console()
 
 
-@app.command()
-def main(
-    query: str = typer.Argument(..., help="Search query for PubMed"),
+def search_papers(
+    query: Optional[str] = typer.Argument(None, help="Search query for PubMed"),
     file: Optional[str] = typer.Option(
-        None, 
-        "--file", 
-        "-f", 
+        None,
+        "--file",
+        "-f",
         help="Output CSV file path (default: results.csv)"
+    ),
+    help_flag: bool = typer.Option(
+        False,
+        "--help",
+        "-h",
+        help="Show this message and exit"
     ),
     max_results: int = typer.Option(
         20, 
@@ -74,14 +73,37 @@ def main(
         get-papers-list "machine learning drug discovery" --max-results 50
     """
     
-    # Set default output file if not provided
-    if not file:
-        file = "results.csv"
+    # Handle help flag
+    if help_flag:
+        console.print(__doc__ or "PubMed Paper Finder - Find research papers with non-academic authors")
+        console.print("\nUsage: get-papers-list [OPTIONS] QUERY")
+        console.print("\nOptions:")
+        console.print("  -h, --help     Show this message and exit")
+        console.print("  -d, --debug    Enable debug output")
+        console.print("  -f, --file     Output CSV file path")
+        console.print("  -e, --email    Your email address (recommended by NCBI)")
+        console.print("  --detailed     Export detailed report with individual author rows")
+        console.print("  --max-results  Maximum number of papers to retrieve [default: 20]")
+        console.print("\nExample:")
+        console.print('  get-papers-list "cancer therapy" --file output.csv --debug')
+        raise typer.Exit(0)
+
+    # Validate query is provided when not showing help
+    if not query:
+        console.print("[red]Error: Missing argument 'QUERY'.[/red]")
+        console.print("Use -h or --help for usage information.")
+        raise typer.Exit(1)
+
+    # Check if output should go to console or file
+    output_to_console = file is None
     
     console.print(f"[bold blue]PubMed Paper Finder[/bold blue]")
     console.print(f"Query: [green]{query}[/green]")
     console.print(f"Max results: [yellow]{max_results}[/yellow]")
-    console.print(f"Output file: [cyan]{file}[/cyan]")
+    if output_to_console:
+        console.print("Output: [cyan]Console[/cyan]")
+    else:
+        console.print(f"Output file: [cyan]{file}[/cyan]")
     
     if debug:
         console.print("[yellow]Debug mode enabled[/yellow]")
@@ -140,13 +162,16 @@ def main(
             
             # Step 5: Export results
             export_task = progress.add_task("Exporting results...", total=None)
-            
+
             if papers_with_industry:
-                exporter.export_papers(papers_with_industry, file)
-                
-                if detailed:
-                    exporter.export_detailed_report(papers_with_industry, file)
-                
+                if output_to_console:
+                    exporter.print_to_console(papers_with_industry)
+                else:
+                    exporter.export_papers(papers_with_industry, file)
+
+                    if detailed:
+                        exporter.export_detailed_report(papers_with_industry, file)
+
                 progress.update(export_task, description="Export complete")
             else:
                 progress.update(export_task, description="No papers to export")
@@ -156,14 +181,18 @@ def main(
         exporter.print_summary(all_papers)
         
         if papers_with_industry:
-            console.print(f"\n[green]✓ Results exported to: {file}[/green]")
-            
-            if detailed:
-                detailed_file = os.path.splitext(file)[0] + "_detailed.csv"
-                console.print(f"[green]✓ Detailed report exported to: {detailed_file}[/green]")
-            
-            # Show preview of results
-            _show_results_preview(papers_with_industry, filter_obj)
+            if output_to_console:
+                console.print(f"\n[green]✓ Results displayed above[/green]")
+            else:
+                console.print(f"\n[green]✓ Results exported to: {file}[/green]")
+
+                if detailed:
+                    detailed_file = os.path.splitext(file)[0] + "_detailed.csv"
+                    console.print(f"[green]✓ Detailed report exported to: {detailed_file}[/green]")
+
+            # Show preview of results (only if not already printed to console)
+            if not output_to_console:
+                _show_results_preview(papers_with_industry, filter_obj)
         else:
             console.print(f"\n[yellow]No papers with industry authors found for query: {query}[/yellow]")
             console.print("[dim]Try a different search query or check the filtering criteria.[/dim]")
@@ -207,12 +236,10 @@ def _show_results_preview(papers, filter_obj):
         console.print(f"[dim]... and {len(papers) - 5} more papers[/dim]")
 
 
-@app.command()
-def version():
-    """Show version information."""
-    from paper_finder import __version__
-    console.print(f"get-papers-list version {__version__}")
+def main():
+    """Entry point for Poetry script."""
+    typer.run(search_papers)
 
 
 if __name__ == "__main__":
-    app()
+    main()

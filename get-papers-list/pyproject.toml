@@ -2,9 +2,24 @@
 name = "get-papers-list"
 version = "0.1.0"
 description = "CLI tool to find research papers with non-academic authors from PubMed"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["PubMed Paper Finder <pubmed.finder@example.com>"]
 readme = "README.md"
 packages = [{include = "paper_finder"}]
+license = "MIT"
+homepage = "https://github.com/example/get-papers-list"
+repository = "https://github.com/example/get-papers-list"
+keywords = ["pubmed", "research", "papers", "pharmaceutical", "biotech", "industry"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Text Processing :: Markup :: XML"
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"

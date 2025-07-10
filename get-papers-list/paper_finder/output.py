@@ -119,7 +119,45 @@ class CSVExporter:
             author_names.append(name)
         
         return "; ".join(author_names)
-    
+
+    def print_to_console(self, papers: List[Paper]) -> None:
+        """
+        Print papers to console in CSV format.
+
+        Args:
+            papers: List of Paper objects to print
+        """
+        if not papers:
+            print("No papers to display.")
+            return
+
+        # Prepare data for console output
+        csv_data = []
+
+        for paper in papers:
+            # Identify industry authors for this paper
+            industry_authors = self.filter.identify_industry_authors(paper.authors)
+
+            if industry_authors:  # Only include papers with industry authors
+                row_data = self._prepare_paper_row(paper, industry_authors)
+                csv_data.append(row_data)
+
+        if not csv_data:
+            print("No papers with industry authors found.")
+            return
+
+        # Create DataFrame and print to console
+        df = pd.DataFrame(csv_data)
+
+        # Print CSV header and data
+        print("\n" + "="*80)
+        print("RESULTS (CSV FORMAT)")
+        print("="*80)
+        print(df.to_csv(index=False, encoding='utf-8'))
+
+        if self.debug:
+            print(f"Displayed {len(csv_data)} papers to console")
+
     def print_summary(self, papers: List[Paper]) -> None:
         """
         Print a summary of the results.
