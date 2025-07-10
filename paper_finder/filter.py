@@ -24,7 +24,16 @@ class AffiliationFilter:
         'inc', 'incorporated', 'ltd', 'limited', 'llc', 'corp', 'corporation',
         'company', 'co.', 'gmbh', 'ag', 'sa', 'plc', 'pty', 'pvt',
         'biosciences', 'life sciences', 'research and development', 'r&d',
-        'drug discovery', 'clinical research', 'contract research'
+        'drug discovery', 'clinical research', 'contract research',
+        # Major pharma companies
+        'novartis', 'pfizer', 'roche', 'merck', 'gsk', 'glaxosmithkline',
+        'sanofi', 'astrazeneca', 'bristol', 'myers', 'squibb', 'eli lilly',
+        'johnson', 'janssen', 'bayer', 'boehringer', 'ingelheim', 'takeda',
+        'abbvie', 'amgen', 'gilead', 'biogen', 'regeneron', 'vertex',
+        'moderna', 'biontech', 'illumina', 'thermo fisher', 'danaher',
+        # Additional industry terms
+        'medicines', 'drugs', 'clinical development', 'drug development',
+        'biopharmaceutical', 'medical device', 'diagnostics'
     }
     
     # Academic email domains
@@ -115,12 +124,21 @@ class AffiliationFilter:
         
         # Combine scores with email having higher weight
         total_score = (email_score * 0.7) + (affiliation_score * 0.3)
-        
+
         if self.debug:
+            print(f"  Author: {author.first_name} {author.last_name}")
+            print(f"  Email: {email}")
+            print(f"  Affiliation: {affiliation_text}")
             print(f"  Email score: {email_score}, Affiliation score: {affiliation_score}, Total: {total_score}")
-        
-        # Threshold for considering someone as industry-affiliated
-        return total_score > 0.5
+
+        # More lenient threshold for considering someone as industry-affiliated
+        # Also check for any strong industry indicators
+        has_strong_industry_indicator = any(keyword in affiliation_text for keyword in [
+            'inc', 'ltd', 'llc', 'corp', 'pharmaceutical', 'pharma', 'biotech',
+            'novartis', 'pfizer', 'roche', 'merck', 'gsk', 'sanofi', 'astrazeneca'
+        ])
+
+        return total_score > 0.3 or has_strong_industry_indicator
     
     def _score_email_domain(self, email: str) -> float:
         """
@@ -180,17 +198,18 @@ class AffiliationFilter:
         if re.search(r'\b(university|college|institute)\b', affiliation_lower):
             academic_count += 2
         
-        # Calculate score
+        # Calculate score - be more generous with industry detection
         if academic_count > 0 and industry_count == 0:
             return -0.7
         elif industry_count > 0 and academic_count == 0:
-            return 0.8
+            return 0.9  # Increased from 0.8
         elif industry_count > academic_count:
-            return 0.5
+            return 0.7  # Increased from 0.5
         elif academic_count > industry_count:
-            return -0.5
+            return -0.3  # Less negative than -0.5
         else:
-            return 0.0
+            # If no clear indicators, slightly favor industry for research purposes
+            return 0.1
     
     def get_company_affiliations(self, authors: List[Author]) -> List[str]:
         """

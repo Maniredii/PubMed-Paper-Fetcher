@@ -123,18 +123,36 @@ def perform_search(search_id, query, max_results, email, debug):
         # Step 4: Filter for industry authors
         search_results[search_id]['progress'] = 'Filtering for industry authors...'
         print(f"DEBUG: Filtering {len(all_papers)} papers for industry authors")
-        papers_with_industry = filter_obj.filter_papers_with_industry_authors(all_papers)
-        print(f"DEBUG: Found {len(papers_with_industry)} papers with industry authors")
+
+        # Process all papers and identify which have industry authors
+        papers_with_industry = []
+        all_papers_data = []
+
+        for i, paper in enumerate(all_papers):
+            print(f"DEBUG: Analyzing paper {i+1}/{len(all_papers)}: {paper.pubmed_id}")
+            industry_authors = filter_obj.identify_industry_authors(paper.authors)
+
+            if industry_authors:
+                papers_with_industry.append(paper)
+                print(f"DEBUG: ✅ Paper {paper.pubmed_id} has {len(industry_authors)} industry authors")
+            else:
+                print(f"DEBUG: ❌ Paper {paper.pubmed_id} has NO industry authors")
+                # Let's see why - check first few authors
+                for j, author in enumerate(paper.authors[:3]):  # Check first 3 authors
+                    is_industry = filter_obj.is_industry_affiliation(author)
+                    print(f"DEBUG:   Author {j+1}: {author.first_name} {author.last_name} - Industry: {is_industry}")
+
+        print(f"DEBUG: Found {len(papers_with_industry)} papers with industry authors out of {len(all_papers)} total")
         
         # Step 5: Prepare results
         search_results[search_id]['progress'] = 'Preparing results...'
-        print(f"DEBUG: Preparing results for {len(papers_with_industry)} papers")
+        print(f"DEBUG: Preparing results for {len(all_papers)} papers")
 
-        # Convert papers to JSON-serializable format
+        # Convert ALL papers to JSON-serializable format (not just those with industry authors)
         results_data = []
         total_industry_authors = 0
 
-        for i, paper in enumerate(papers_with_industry):
+        for i, paper in enumerate(all_papers):
             print(f"DEBUG: Processing paper {i+1}: {paper.pubmed_id}")
             industry_authors = filter_obj.identify_industry_authors(paper.authors)
             companies = filter_obj.get_company_affiliations(industry_authors)
@@ -166,6 +184,7 @@ def perform_search(search_id, query, max_results, email, debug):
             'total_papers': len(all_papers),
             'papers_with_industry': len(papers_with_industry),
             'total_industry_authors': total_industry_authors,
+            'papers_shown': len(results_data),  # All papers are now shown
             'query': query,
             'timestamp': datetime.now().isoformat()
         }
