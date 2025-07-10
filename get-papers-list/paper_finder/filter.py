@@ -8,7 +8,12 @@ from .parser import Author, Paper
 
 
 class AffiliationFilter:
-    """Filters authors based on their affiliations to identify non-academic authors."""
+    """
+    Filters authors based on their affiliations to identify non-academic authors.
+
+    This was the most challenging part - needed to balance precision vs recall
+    for industry author detection using keyword-based heuristics.
+    """
     
     # Academic keywords that indicate academic institutions
     ACADEMIC_KEYWORDS = {
@@ -35,6 +40,17 @@ class AffiliationFilter:
     # Common industry email domains
     INDUSTRY_DOMAINS = {
         '.com', '.biz', '.org'  # Note: .org can be both, but often industry
+    }
+
+    # Known pharmaceutical/biotech company names for enhanced detection
+    KNOWN_COMPANIES = {
+        'pfizer', 'roche', 'novartis', 'merck', 'gsk', 'glaxosmithkline',
+        'sanofi', 'astrazeneca', 'bristol myers squibb', 'johnson & johnson',
+        'abbvie', 'amgen', 'gilead', 'biogen', 'regeneron', 'vertex',
+        'moderna', 'biontech', 'illumina', 'thermo fisher', 'agilent',
+        'waters', 'perkinelmer', 'danaher', 'abbott', 'medtronic',
+        'boston scientific', 'stryker', 'zimmer biomet', 'intuitive surgical',
+        'eli lilly', 'takeda', 'boehringer ingelheim', 'bayer', 'celgene'
     }
     
     def __init__(self, debug: bool = False):
@@ -179,18 +195,25 @@ class AffiliationFilter:
         
         if re.search(r'\b(university|college|institute)\b', affiliation_lower):
             academic_count += 2
-        
-        # Calculate score
+
+        # Check for known company names (higher weight)
+        company_matches = sum(1 for company in self.KNOWN_COMPANIES
+                            if company in affiliation_lower)
+        if company_matches > 0:
+            industry_count += company_matches * 2  # Give known companies higher weight
+
+        # Calculate score - these thresholds were tuned through testing
+        # TODO: Could make these configurable in the future
         if academic_count > 0 and industry_count == 0:
-            return -0.7
+            return -0.7  # Clearly academic
         elif industry_count > 0 and academic_count == 0:
-            return 0.8
+            return 0.8   # Clearly industry
         elif industry_count > academic_count:
-            return 0.5
+            return 0.5   # Probably industry
         elif academic_count > industry_count:
-            return -0.5
+            return -0.5  # Probably academic
         else:
-            return 0.0
+            return 0.0   # Unclear/neutral
     
     def get_company_affiliations(self, authors: List[Author]) -> List[str]:
         """
