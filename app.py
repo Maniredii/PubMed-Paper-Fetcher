@@ -72,17 +72,22 @@ def search_papers():
 def perform_search(search_id, query, max_results, email, debug):
     """Perform the actual search in a background thread."""
     try:
+        print(f"DEBUG: Starting search for query: {query}")
+
         # Initialize components
         fetcher = PubMedFetcher(email=email)
         parser = PubMedParser()
-        filter_obj = AffiliationFilter(debug=debug)
-        exporter = CSVExporter(debug=debug)
-        
+        filter_obj = AffiliationFilter(debug=True)  # Always enable debug for web app
+        exporter = CSVExporter(debug=True)
+
         # Step 1: Search PubMed
         search_results[search_id]['progress'] = 'Searching PubMed...'
+        print(f"DEBUG: Searching PubMed with query: {query}, max_results: {max_results}")
         pubmed_ids = fetcher.search_papers(query, max_results)
-        
+        print(f"DEBUG: Found {len(pubmed_ids)} PubMed IDs: {pubmed_ids[:5]}")
+
         if not pubmed_ids:
+            print("DEBUG: No PubMed IDs found")
             search_results[search_id] = {
                 'status': 'completed',
                 'progress': 'No papers found',
@@ -100,30 +105,41 @@ def perform_search(search_id, query, max_results, email, debug):
         
         # Step 2: Fetch paper details
         search_results[search_id]['progress'] = f'Found {len(pubmed_ids)} papers. Fetching details...'
+        print(f"DEBUG: Fetching details for {len(pubmed_ids)} papers")
         xml_responses = fetcher.fetch_papers_batch(pubmed_ids)
-        
+        print(f"DEBUG: Got {len(xml_responses)} XML responses")
+
         # Step 3: Parse papers
         search_results[search_id]['progress'] = 'Parsing paper data...'
         all_papers = []
-        for xml_response in xml_responses:
+        for i, xml_response in enumerate(xml_responses):
+            print(f"DEBUG: Parsing XML response {i+1}/{len(xml_responses)}")
             papers = parser.parse_papers(xml_response)
+            print(f"DEBUG: Parsed {len(papers)} papers from response {i+1}")
             all_papers.extend(papers)
-        
+
+        print(f"DEBUG: Total papers parsed: {len(all_papers)}")
+
         # Step 4: Filter for industry authors
         search_results[search_id]['progress'] = 'Filtering for industry authors...'
+        print(f"DEBUG: Filtering {len(all_papers)} papers for industry authors")
         papers_with_industry = filter_obj.filter_papers_with_industry_authors(all_papers)
+        print(f"DEBUG: Found {len(papers_with_industry)} papers with industry authors")
         
         # Step 5: Prepare results
         search_results[search_id]['progress'] = 'Preparing results...'
-        
+        print(f"DEBUG: Preparing results for {len(papers_with_industry)} papers")
+
         # Convert papers to JSON-serializable format
         results_data = []
         total_industry_authors = 0
-        
-        for paper in papers_with_industry:
+
+        for i, paper in enumerate(papers_with_industry):
+            print(f"DEBUG: Processing paper {i+1}: {paper.pubmed_id}")
             industry_authors = filter_obj.identify_industry_authors(paper.authors)
             companies = filter_obj.get_company_affiliations(industry_authors)
             total_industry_authors += len(industry_authors)
+            print(f"DEBUG: Paper {paper.pubmed_id} has {len(industry_authors)} industry authors")
             
             paper_data = {
                 'pubmed_id': paper.pubmed_id,
