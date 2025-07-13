@@ -14,14 +14,6 @@ from datetime import datetime
 import threading
 import time
 
-# Load environment variables from .env file
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    # dotenv not installed, use environment variables directly
-    pass
-
 # Add the get-papers-list directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'get-papers-list'))
 
