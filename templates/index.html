@@ -765,7 +765,8 @@
             <!-- Header -->
             <div class="header">
                 <h1><i class="fas fa-microscope me-3"></i>PubMed Paper Finder</h1>
-                <p class="mb-0"><i class="fas fa-search me-2"></i>Discover research papers with industry authors and collaborations</p>
+                <p class="mb-2"><i class="fas fa-search me-2"></i>Discover research papers with industry authors and collaborations</p>
+                <p class="mb-0"><small><i class="fas fa-user me-1"></i>Developed by <strong>Manideep Reddy Eevuri</strong></small></p>
             </div>
 
             <!-- Search Section -->
@@ -848,9 +849,14 @@
                     </div>
                     
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-search"></i> Search Papers
-                        </button>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-search"></i> Search Papers
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-lg" id="enhanceQueryBtn" title="Enhance query with AI">
+                                <i class="fas fa-magic"></i> AI Enhance
+                            </button>
+                        </div>
                         <div class="mt-3">
                             <small class="text-muted">
                                 <i class="fas fa-clock me-1"></i>
@@ -876,6 +882,26 @@
                 <!-- Summary will be inserted here -->
                 <div id="summaryContainer"></div>
 
+                <!-- AI Insights Section -->
+                <div id="aiInsightsContainer" style="display: none;">
+                    <div class="card mt-4" style="border: 2px solid #4facfe; background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%);">
+                        <div class="card-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                            <h5 class="mb-0"><i class="fas fa-brain me-2"></i>AI Research Insights</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <button class="btn btn-primary me-2" id="analyzeTrendsBtn">
+                                    <i class="fas fa-chart-line me-1"></i>Analyze Research Trends
+                                </button>
+                                <button class="btn btn-info" id="viewInsightsBtn" style="display: none;">
+                                    <i class="fas fa-eye me-1"></i>View Detailed Insights
+                                </button>
+                            </div>
+                            <div id="trendsContainer" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Filter controls will be inserted here -->
                 <div id="filterContainer"></div>
 
@@ -895,6 +921,7 @@
                     <div class="col-md-4">
                         <h6 class="text-muted mb-2"><i class="fas fa-info-circle me-1"></i>About</h6>
                         <small class="text-muted">
+                            Developed by <strong>Manideep Reddy Eevuri</strong><br>
                             Powered by PubMed API<br>
                             Industry author detection algorithm
                         </small>
@@ -1058,6 +1085,9 @@
             document.getElementById('progressContainer').style.display = 'none';
             document.getElementById('resultsSection').style.display = 'block';
 
+            // Show AI insights section
+            document.getElementById('aiInsightsContainer').style.display = 'block';
+
             // Display summary
             const summaryHtml = `
                 <div class="summary-card">
@@ -1173,10 +1203,20 @@
                             ${paper.companies.map(company => `<span class="company-badge">${company}</span>`).join('')}
                         </div>
                         ` : ''}
-                        
+
+                        ${paper.llm_insights ? `
+                        <div class="mb-2">
+                            <div class="alert alert-info p-2 mb-2" style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border: 1px solid #4facfe;">
+                                <strong><i class="fas fa-brain text-primary"></i> AI Insights:</strong>
+                                <small class="d-block mt-1">${paper.llm_insights.summary || 'Analysis in progress...'}</small>
+                                ${paper.llm_insights.key_findings ? `<small class="text-muted d-block"><strong>Key Findings:</strong> ${paper.llm_insights.key_findings}</small>` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+
                         ${paper.corresponding_email ? `
                         <div class="mb-2">
-                            <strong><i class="fas fa-envelope"></i> Corresponding Author:</strong> 
+                            <strong><i class="fas fa-envelope"></i> Corresponding Author:</strong>
                             <a href="mailto:${paper.corresponding_email}">${paper.corresponding_email}</a>
                         </div>
                         ` : ''}
@@ -1555,6 +1595,111 @@
                 currentPageSize = urlParams.page_size;
                 applyFilter(currentFilter);
             }
+        });
+
+        // LLM Enhancement Functions
+        async function enhanceQuery() {
+            const query = document.getElementById('query').value.trim();
+            if (!query) {
+                alert('Please enter a search query first');
+                return;
+            }
+
+            const btn = document.getElementById('enhanceQueryBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enhancing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/enhance-query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+                if (data.enhanced) {
+                    document.getElementById('query').value = data.enhanced.enhanced_query;
+
+                    // Show enhancement details
+                    alert(`Query Enhanced!\n\nOriginal: ${query}\n\nEnhanced: ${data.enhanced.enhanced_query}\n\nSuggestions: ${data.enhanced.alternatives.join(', ')}`);
+                }
+            } catch (error) {
+                console.error('Error enhancing query:', error);
+                alert('Failed to enhance query. Please try again.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function analyzeTrends() {
+            if (!currentSearchId) {
+                alert('Please perform a search first');
+                return;
+            }
+
+            const btn = document.getElementById('analyzeTrendsBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/analyze-trends/${currentSearchId}`);
+                const data = await response.json();
+
+                if (data.trends) {
+                    displayTrends(data.trends);
+                    document.getElementById('trendsContainer').style.display = 'block';
+                    document.getElementById('viewInsightsBtn').style.display = 'inline-block';
+                }
+            } catch (error) {
+                console.error('Error analyzing trends:', error);
+                alert('Failed to analyze trends. Please try again.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function displayTrends(trends) {
+            const container = document.getElementById('trendsContainer');
+            container.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-tags text-primary"></i> Research Themes</h6>
+                        <ul class="list-unstyled">
+                            ${trends.themes.map(theme => `<li><i class="fas fa-chevron-right text-muted me-1"></i>${theme}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-trending-up text-success"></i> Emerging Trends</h6>
+                        <ul class="list-unstyled">
+                            ${trends.trends.map(trend => `<li><i class="fas fa-chevron-right text-muted me-1"></i>${trend}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-building text-info"></i> Key Players</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            ${trends.key_players.slice(0, 8).map(player => `<span class="badge bg-info">${player}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-microscope text-warning"></i> Methodologies</h6>
+                        <ul class="list-unstyled">
+                            ${trends.methodologies.slice(0, 3).map(method => `<li><i class="fas fa-chevron-right text-muted me-1"></i>${method}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Event listeners for LLM features
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('enhanceQueryBtn').addEventListener('click', enhanceQuery);
+            document.getElementById('analyzeTrendsBtn').addEventListener('click', analyzeTrends);
         });
     </script>
 </body>

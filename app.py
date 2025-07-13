@@ -21,9 +21,14 @@ from paper_finder.fetch import PubMedFetcher
 from paper_finder.parser import PubMedParser
 from paper_finder.filter import AffiliationFilter
 from paper_finder.output import CSVExporter
+from llm_service import GroqLLMService
 
 app = Flask(__name__)
 CORS(app)
+
+# Initialize LLM service with Groq API
+GROQ_API_KEY = "add your groq api key"
+llm_service = GroqLLMService(api_key=GROQ_API_KEY)
 
 # Global variable to store search results
 search_results = {}
@@ -234,6 +239,22 @@ def perform_search(search_id, query, email, debug, page=1, page_size=15, search_
             total_industry_authors += len(industry_authors)
             print(f"DEBUG: Paper {paper.pubmed_id} has {len(industry_authors)} industry authors")
 
+            # Generate LLM insights for papers with industry authors
+            llm_insights = None
+            if has_industry and i < 10:  # Limit LLM analysis to first 10 industry papers for speed
+                try:
+                    print(f"DEBUG: Generating LLM insights for paper {paper.pubmed_id}")
+                    author_names = [f"{author.last_name}, {author.first_name or author.initials}"
+                                  for author in paper.authors[:5]]  # First 5 authors
+                    llm_insights = llm_service.summarize_paper(
+                        title=paper.title,
+                        abstract=getattr(paper, 'abstract', None),
+                        authors=author_names
+                    )
+                except Exception as e:
+                    print(f"DEBUG: LLM analysis failed for paper {paper.pubmed_id}: {e}")
+                    llm_insights = None
+
             paper_data = {
                 'pubmed_id': paper.pubmed_id,
                 'title': paper.title,
@@ -251,7 +272,8 @@ def perform_search(search_id, query, email, debug, page=1, page_size=15, search_
                 'companies': companies,
                 'corresponding_email': paper.corresponding_author_email,
                 'total_authors': len(paper.authors),
-                'industry_authors_count': len(industry_authors)
+                'industry_authors_count': len(industry_authors),
+                'llm_insights': llm_insights  # Add LLM insights
             }
             results_data.append(paper_data)
 
@@ -397,6 +419,88 @@ def download_results(search_id):
         
         return send_file(filepath, as_attachment=True, download_name=filename)
         
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/analyze-trends/<search_id>')
+def analyze_trends(search_id):
+    """Generate research trend analysis using LLM."""
+    try:
+        if search_id not in search_results:
+            return jsonify({'error': 'Search not found'}), 404
+
+        result = search_results[search_id]
+        if result['status'] != 'completed' or not result['results']:
+            return jsonify({'error': 'No results available'}), 404
+
+        # Get all papers for trend analysis
+        all_papers = result['results'].get('all_papers', result['results']['papers'])
+
+        # Generate trend analysis
+        trends = llm_service.analyze_research_trends(all_papers)
+
+        return jsonify({
+            'trends': trends,
+            'analyzed_papers': len(all_papers),
+            'timestamp': datetime.now().isoformat()
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/enhance-query', methods=['POST'])
+def enhance_query():
+    """Enhance search query using LLM."""
+    try:
+        data = request.get_json()
+        query = data.get('query', '').strip()
+
+        if not query:
+            return jsonify({'error': 'Query is required'}), 400
+
+        # Get enhanced query suggestions
+        enhanced = llm_service.enhance_search_query(query)
+
+        return jsonify({
+            'original_query': query,
+            'enhanced': enhanced,
+            'timestamp': datetime.now().isoformat()
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/paper-insights/<search_id>/<pubmed_id>')
+def get_paper_insights(search_id, pubmed_id):
+    """Get detailed LLM insights for a specific paper."""
+    try:
+        if search_id not in search_results:
+            return jsonify({'error': 'Search not found'}), 404
+
+        result = search_results[search_id]
+        if result['status'] != 'completed' or not result['results']:
+            return jsonify({'error': 'No results available'}), 404
+
+        # Find the specific paper
+        all_papers = result['results'].get('all_papers', result['results']['papers'])
+        paper_data = None
+        for paper in all_papers:
+            if paper['pubmed_id'] == pubmed_id:
+                paper_data = paper
+                break
+
+        if not paper_data:
+            return jsonify({'error': 'Paper not found'}), 404
+
+        # Generate detailed insights
+        insights = llm_service.generate_research_insights(paper_data)
+
+        return jsonify({
+            'paper_id': pubmed_id,
+            'insights': insights,
+            'timestamp': datetime.now().isoformat()
+        })
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

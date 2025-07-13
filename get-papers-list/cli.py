@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 CLI interface for the PubMed paper finder tool.
+Developed by Manideep Reddy Eevuri
 """
 
 import typer
@@ -75,6 +76,7 @@ def search_papers(
     # Handle help flag
     if help_flag:
         console.print(__doc__ or "PubMed Paper Finder - Find research papers with non-academic authors")
+        console.print("Developed by Manideep Reddy Eevuri")
         console.print("\nUsage: get-papers-list [OPTIONS] QUERY")
         console.print("\nOptions:")
         console.print("  -h, --help     Show this message and exit")
