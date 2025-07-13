@@ -1,44 +1,98 @@
-# PubMed Paper Finder
+# 🧬 AI-Enhanced PubMed Research Discovery Platform
 
-A command-line tool to search PubMed for research papers and identify those with authors from pharmaceutical or biotech companies. This tool helps researchers and analysts quickly find industry-sponsored research in their field of interest.
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-2.3+-green.svg)](https://flask.palletsprojects.com)
+[![Groq](https://img.shields.io/badge/Groq-LLM-orange.svg)](https://groq.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Project Overview
+> **Intelligent biomedical research discovery with AI-powered insights and industry collaboration analysis**
 
-This project was developed as part of a backend engineering assessment. The goal was to create a robust, well-documented tool that can:
+## 🚀 Features
 
-- Search PubMed using any valid query syntax
-- Identify papers with non-academic (industry) authors
-- Export results in a structured CSV format
-- Provide both command-line and web interfaces
-- Show exact counts of papers requested, found, and displayed
+### 🔍 **Smart Search Capabilities**
+- **AI-Enhanced Queries**: Automatically improve search terms using Groq LLM
+- **Industry Focus**: Specifically targets papers with industry-academic collaborations
+- **Real-time Results**: Fast, responsive search with progress tracking
+- **Advanced Filtering**: Filter by industry involvement, publication date, and more
 
-## Quick Start
+### 🧠 **AI-Powered Analysis**
+- **Research Summarization**: Automatic paper summaries and key findings extraction
+- **Trend Analysis**: Identify emerging research themes and collaboration patterns
+- **Industry Detection**: Smart algorithm to identify pharmaceutical, biotech, and other industry authors
+- **Insight Generation**: Comprehensive analysis of research significance and impact
 
-### Command Line Interface
-```bash
-# Clone and run in 3 commands
-git clone https://github.com/Maniredii/Aganitha-Test.git
-cd Aganitha-Test/get-papers-list
-pip install -r requirements.txt
+### 💻 **Modern Web Interface**
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
+- **Interactive UI**: Real-time updates, smooth animations, and intuitive navigation
+- **Export Functionality**: Download results as CSV for further analysis
+- **Pagination**: Efficient handling of large result sets
 
-# Run your first search
-python cli.py "cancer therapy" --max-results 5
-```
+### 📊 **Data Management**
+- **PubMed Integration**: Direct access to 35+ million biomedical citations
+- **Structured Output**: Organized data with author affiliations and company information
+- **Performance Optimization**: Intelligent caching and batch processing
 
-### Web Interface
-```bash
-# Clone the repository
-git clone https://github.com/Maniredii/Aganitha-Test.git
-cd Aganitha-Test
+## 🛠️ Installation
 
-# Install dependencies (Flask is needed for web interface)
-pip install flask flask-cors requests typer pandas lxml rich
+### Prerequisites
+- Python 3.10 or higher
+- pip package manager
+- Internet connection for API access
+- Groq API key (free at [console.groq.com](https://console.groq.com))
 
-# Start the web application
-python app.py
+### Quick Start
 
-# Open your browser and go to: http://localhost:5000
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/ai-pubmed-discovery.git
+   cd ai-pubmed-discovery
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pip install flask flask-cors groq pandas requests beautifulsoup4
+   ```
+
+3. **Configure environment variables**
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+
+   # Edit .env and add your actual Groq API key
+   # Get your free API key from: https://console.groq.com
+   GROQ_API_KEY=your-actual-groq-api-key-here
+   ```
+
+4. **Run the application**
+   ```bash
+   python app.py
+   ```
+
+5. **Access the application**
+   Open your browser and go to: `http://localhost:5000`
+
+## 📖 Usage Guide
+
+### Basic Search
+1. Enter your research query (e.g., "diabetes treatment", "cancer immunotherapy")
+2. Optionally provide your email (recommended by NCBI for API usage)
+3. Click **"Search Papers"** to start the search
+
+### AI Enhancement
+1. Enter your query
+2. Click **"AI Enhance"** to improve the search terms automatically
+3. Review the enhanced query and proceed with the search
+
+### Analyzing Results
+1. After search completion, view the summary statistics
+2. Click **"Analyze Research Trends"** for AI-powered trend analysis
+3. Browse through papers with automatic industry detection
+4. View AI-generated insights for papers with industry collaborations
+
+### Exporting Data
+1. Complete a search
+2. Click the **"Download CSV"** button
+3. Get a comprehensive spreadsheet with all paper details
 
 ## How the Code is Organized
 

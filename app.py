@@ -14,6 +14,14 @@ from datetime import datetime
 import threading
 import time
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # dotenv not installed, use environment variables directly
+    pass
+
 # Add the get-papers-list directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'get-papers-list'))
 
@@ -27,7 +35,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Initialize LLM service with Groq API
-GROQ_API_KEY = "add your groq api key"
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', 'your-groq-api-key-here')
 llm_service = GroqLLMService(api_key=GROQ_API_KEY)
 
 # Global variable to store search results
