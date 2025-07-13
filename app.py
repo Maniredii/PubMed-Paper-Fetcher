@@ -59,6 +59,23 @@ def enhance_search_query(original_query):
         # Query already has industry focus, just return original
         return original_query
 
+def get_optimal_search_limit(query):
+    """Determine optimal search limit based on query specificity for faster results."""
+    query_lower = query.lower()
+
+    # If query contains specific company names, search more papers
+    company_names = ['pfizer', 'roche', 'novartis', 'gsk', 'merck', 'iqvia', 'covance', 'moderna', 'biontech']
+    if any(company in query_lower for company in company_names):
+        return 150  # More papers for specific company searches
+
+    # If query is very specific, search fewer papers for faster results
+    specific_terms = ['clinical trial', 'drug development', 'pharmaceutical', 'biotech']
+    if any(term in query_lower for term in specific_terms):
+        return 100
+
+    # Default for general searches - optimized for speed
+    return 75
+
 @app.route('/')
 def index():
     """Main page of the web application."""
@@ -74,7 +91,7 @@ def search_papers():
         debug = data.get('debug', False)
         page = int(data.get('page', 1))
         page_size = int(data.get('page_size', 15))
-        # Search all available papers (no max_results limit)
+        search_limit = data.get('search_limit', 'fast')  # fast, balanced, comprehensive
         
         if not query:
             return jsonify({'error': 'Query is required'}), 400
@@ -93,7 +110,7 @@ def search_papers():
         # Start search in background thread
         thread = threading.Thread(
             target=perform_search,
-            args=(search_id, query, email, debug, page, page_size)
+            args=(search_id, query, email, debug, page, page_size, search_limit)
         )
         thread.daemon = True
         thread.start()
@@ -103,7 +120,7 @@ def search_papers():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-def perform_search(search_id, query, email, debug, page=1, page_size=15):
+def perform_search(search_id, query, email, debug, page=1, page_size=15, search_limit='fast'):
     """Perform the actual search in a background thread."""
     try:
         print(f"DEBUG: Starting search for query: {query}")
@@ -121,9 +138,17 @@ def perform_search(search_id, query, email, debug, page=1, page_size=15):
         enhanced_query = enhance_search_query(query)
         print(f"DEBUG: Original query: {query}")
         print(f"DEBUG: Enhanced query: {enhanced_query}")
-        print(f"DEBUG: Searching PubMed with enhanced query (no limit)")
-        # Search without max_results limit to get all available papers
-        pubmed_ids = fetcher.search_papers(enhanced_query)
+        # Get search limit based on user preference and query
+        if search_limit == 'comprehensive':
+            max_results = 250
+        elif search_limit == 'balanced':
+            max_results = get_optimal_search_limit(query)
+        else:  # fast
+            max_results = min(75, get_optimal_search_limit(query))
+
+        print(f"DEBUG: Searching PubMed with enhanced query (limit: {max_results}, mode: {search_limit})")
+        # Search with user-selected performance mode
+        pubmed_ids = fetcher.search_papers(enhanced_query, max_results=max_results)
         print(f"DEBUG: Found {len(pubmed_ids)} PubMed IDs: {pubmed_ids[:5]}")
 
         if not pubmed_ids:
@@ -146,13 +171,16 @@ def perform_search(search_id, query, email, debug, page=1, page_size=15):
         # Step 2: Fetch paper details
         search_results[search_id]['progress'] = f'Found {len(pubmed_ids)} papers. Fetching details...'
         print(f"DEBUG: Fetching details for {len(pubmed_ids)} papers")
-        xml_responses = fetcher.fetch_papers_batch(pubmed_ids)
+
+        # Use smaller batch size for faster initial response
+        xml_responses = fetcher.fetch_papers_batch(pubmed_ids, batch_size=50)
         print(f"DEBUG: Got {len(xml_responses)} XML responses")
 
         # Step 3: Parse papers
         search_results[search_id]['progress'] = 'Parsing paper data...'
         all_papers = []
         for i, xml_response in enumerate(xml_responses):
+            search_results[search_id]['progress'] = f'Parsing papers... ({i+1}/{len(xml_responses)} batches)'
             print(f"DEBUG: Parsing XML response {i+1}/{len(xml_responses)}")
             papers = parser.parse_papers(xml_response)
             print(f"DEBUG: Parsed {len(papers)} papers from response {i+1}")
@@ -169,6 +197,8 @@ def perform_search(search_id, query, email, debug, page=1, page_size=15):
         all_papers_data = []
 
         for i, paper in enumerate(all_papers):
+            if i % 10 == 0:  # Update progress every 10 papers
+                search_results[search_id]['progress'] = f'Analyzing authors... ({i+1}/{len(all_papers)} papers)'
             print(f"DEBUG: Analyzing paper {i+1}/{len(all_papers)}: {paper.pubmed_id}")
             industry_authors = filter_obj.identify_industry_authors(paper.authors)
 
