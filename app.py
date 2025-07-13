@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Flask web application for PubMed Paper Finder.
+By Manideep Reddy Eevuri
 """
 
 from flask import Flask, render_template, request, jsonify, send_file

@@ -7,122 +7,755 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --header-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --success-gradient: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            --warning-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            --info-gradient: linear-gradient(135deg, #4834d4 0%, #686de0 100%);
+            --shadow-light: 0 8px 25px rgba(0,0,0,0.1);
+            --shadow-medium: 0 15px 35px rgba(0,0,0,0.15);
+            --shadow-heavy: 0 25px 50px rgba(0,0,0,0.2);
+            --border-radius: 20px;
+            --border-radius-small: 12px;
         }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+
+        .container-fluid {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
         .main-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-heavy);
+            backdrop-filter: blur(15px);
             margin: 20px auto;
             max-width: 1200px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
+
         .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: var(--header-gradient);
             color: white;
-            padding: 30px;
-            border-radius: 20px 20px 0 0;
+            padding: 40px 30px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
         .search-section {
-            padding: 30px;
+            padding: 40px;
+            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
         }
+
         .results-section {
-            padding: 0 30px 30px;
+            padding: 0 40px 40px;
+            background: white;
         }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: var(--border-radius-small);
+            border: 2px solid #e9ecef;
+            padding: 14px 18px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .btn {
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-primary {
+            background: var(--header-gradient);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid #6c757d;
+            color: #6c757d;
+            background: transparent;
+            text-transform: none;
+            letter-spacing: normal;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            box-shadow: none;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #6c757d;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .quick-search-buttons {
+            margin-top: 15px;
+        }
+
+        .quick-search-buttons .btn {
+            margin: 4px;
+            border-radius: 20px;
+        }
+
         .paper-card {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            background: white;
+            overflow: hidden;
+            border-left: 4px solid transparent;
         }
+
         .paper-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-medium);
         }
+
+        .paper-card.border-success {
+            border-left-color: #28a745;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fff9 100%);
+        }
+
+        .paper-card.border-secondary {
+            border-left-color: #6c757d;
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .card-title a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .card-title a:hover {
+            color: #4facfe;
+        }
+
+        .card-text {
+            color: #6c757d;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bg-success {
+            background: var(--success-gradient) !important;
+            box-shadow: 0 4px 15px rgba(86, 171, 47, 0.3);
+        }
+
+        .bg-secondary {
+            background: var(--info-gradient) !important;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
         .industry-badge {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            background: var(--warning-gradient);
             color: white;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.8em;
-            margin: 2px;
+            font-size: 0.85rem;
+            margin: 3px;
             display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);
+            text-transform: none;
+            letter-spacing: normal;
         }
+
         .company-badge {
-            background: linear-gradient(45deg, #4834d4, #686de0);
+            background: var(--info-gradient);
             color: white;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.8em;
-            margin: 2px;
+            font-size: 0.85rem;
+            margin: 3px;
             display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(72, 52, 212, 0.3);
         }
         .progress-container {
             display: none;
             text-align: center;
-            padding: 30px;
+            padding: 60px 40px;
+            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            margin: 30px 0;
+            box-shadow: var(--shadow-light);
         }
+
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4facfe;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 25px;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border: none;
-            border-radius: 25px;
-            padding: 12px 30px;
+
+        .progress-container h4 {
+            color: #495057;
             font-weight: 600;
+            margin-bottom: 15px;
         }
-        .btn-success {
-            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
-            border: none;
-            border-radius: 25px;
-            padding: 8px 20px;
+
+        .progress-container p {
+            color: #6c757d;
+            font-size: 1rem;
+            margin: 0;
         }
+
         .summary-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary-gradient);
             color: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .summary-card h3 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .summary-card p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-card .row > div {
+            position: relative;
+            z-index: 1;
         }
         .pagination-container {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 1px solid #dee2e6;
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
+
         .pagination-info {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-bottom: 10px;
+            font-size: 1rem;
+            color: #495057;
+            margin-bottom: 15px;
+            font-weight: 600;
         }
+
         .pagination .page-link {
-            border-radius: 5px;
-            margin: 0 2px;
-            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            margin: 0 4px;
+            border: 2px solid #dee2e6;
+            padding: 10px 15px;
+            color: #495057;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
+
+        .pagination .page-link:hover {
+            background: var(--header-gradient);
+            border-color: #4facfe;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
         .pagination .page-item.active .page-link {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary-gradient);
+            border-color: #667eea;
+            color: white;
+            box-shadow: var(--shadow-light);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            opacity: 0.5;
+            pointer-events: none;
+            background: #f8f9fa;
+        }
+
+        .page-size-selector {
+            margin-left: 20px;
+        }
+
+        .page-size-selector .form-select {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+            font-weight: 600;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Filter Controls */
+        .filter-container {
+            margin: 25px 0;
+            padding: 20px;
+            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid #dee2e6;
+            background: white;
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .filter-btn.active {
+            color: white;
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active.all {
+            background: var(--primary-gradient);
             border-color: #667eea;
         }
-        .page-size-selector {
-            display: inline-block;
-            margin-left: 15px;
+
+        .filter-btn.active.industry {
+            background: var(--success-gradient);
+            border-color: #28a745;
+        }
+
+        .filter-btn.active.academic {
+            background: var(--info-gradient);
+            border-color: #6c757d;
+        }
+
+        .filter-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-left: auto;
+            font-weight: 500;
+        }
+
+        .filter-stats {
+            display: flex;
+            gap: 15px;
+            margin-left: 20px;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .filter-stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .filter-stat .badge {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+        }
+
+        .alert {
+            border-radius: var(--border-radius);
+            border: none;
+            padding: 25px;
+            box-shadow: var(--shadow-light);
+            font-size: 1rem;
+        }
+
+        .alert-info {
+            background: linear-gradient(145deg, #d1ecf1 0%, #bee5eb 100%);
+            color: #0c5460;
+        }
+
+        .alert-warning {
+            background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .main-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .search-section, .results-section {
+                padding: 20px;
+            }
+
+            .summary-card {
+                padding: 20px;
+            }
+
+            .summary-card h3 {
+                font-size: 1.8rem;
+            }
+
+            .pagination-container, .filter-container {
+                padding: 15px;
+            }
+
+            .card-body {
+                padding: 20px;
+            }
+
+            .pagination .page-link {
+                padding: 8px 12px;
+                margin: 0 2px;
+            }
+
+            .filter-buttons {
+                flex-direction: column;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .filter-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .filter-stats {
+                margin-left: 0;
+                margin-top: 15px;
+                justify-content: center;
+            }
+
+            .filter-container .row {
+                text-align: center;
+            }
+
+            .filter-container .col-md-8,
+            .filter-container .col-md-4 {
+                margin-bottom: 15px;
+            }
+        }
+
+        /* Loading animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .loading {
+            animation: pulse 2s infinite;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Smooth transitions for all elements */
+        * {
+            transition: all 0.3s ease;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--header-gradient);
+        }
+
+        /* Enhanced visual effects */
+        .main-container {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .search-section {
+            position: relative;
+        }
+
+        .search-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="searchPattern" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23667eea" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23searchPattern)"/></svg>');
+            pointer-events: none;
+            border-radius: var(--border-radius);
+        }
+
+        .form-control:focus {
+            animation: focusPulse 0.3s ease-out;
+        }
+
+        @keyframes focusPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .paper-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .paper-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .paper-card:hover::before {
+            left: 100%;
+        }
+
+        /* Improved badge styling */
+        .badge {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.3s;
+        }
+
+        .badge:hover::before {
+            left: 100%;
+        }
+
+        /* Enhanced summary card */
+        .summary-card .col-md-2 {
+            position: relative;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .summary-card .col-md-2:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+        }
+
+        /* Loading state improvements */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.1);
+            z-index: 9999;
+            display: none;
+        }
+
+        /* Tooltip styles */
+        [data-bs-toggle="tooltip"] {
+            cursor: help;
+        }
+
+        /* Toast notification animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -131,8 +764,8 @@
         <div class="main-container">
             <!-- Header -->
             <div class="header">
-                <h1><i class="fas fa-microscope"></i> PubMed Paper Finder</h1>
-                <p class="mb-0">Find research papers with industry authors and collaborations</p>
+                <h1><i class="fas fa-microscope me-3"></i>PubMed Paper Finder</h1>
+                <p class="mb-0"><i class="fas fa-search me-2"></i>Discover research papers with industry authors and collaborations</p>
             </div>
 
             <!-- Search Section -->
@@ -144,17 +777,23 @@
                                 <label for="query" class="form-label"><i class="fas fa-search"></i> Search Query</label>
                                 <input type="text" class="form-control" id="query" placeholder="e.g., pharmaceutical clinical trial, biotech drug discovery" required>
                                 <div class="form-text">
-                                    <strong>💡 Industry-focused examples:</strong><br>
-                                    • "Pfizer AND cancer" • "biotech diabetes" • "pharmaceutical clinical trial"<br>
-                                    • "drug development" • "IQVIA" • "industry collaboration"
+                                    <i class="fas fa-lightbulb text-warning me-1"></i><strong>Industry-focused examples:</strong><br>
+                                    <i class="fas fa-pills me-1"></i>"Pfizer AND cancer" • <i class="fas fa-dna me-1"></i>"biotech diabetes" • <i class="fas fa-flask me-1"></i>"pharmaceutical clinical trial"<br>
+                                    <i class="fas fa-capsules me-1"></i>"drug development" • <i class="fas fa-building me-1"></i>"IQVIA" • <i class="fas fa-handshake me-1"></i>"industry collaboration"
                                 </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="setQuery('Pfizer AND cancer')">Pfizer Cancer</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="setQuery('biotech diabetes')">Biotech Diabetes</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="setQuery('pharmaceutical clinical trial')">Pharma Trials</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setQuery('drug development')">Drug Development</button>
-                                    </small>
+                                <div class="quick-search-buttons mt-3">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setQuery('Pfizer AND cancer')">
+                                        <i class="fas fa-pills me-1"></i>Pfizer Cancer
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setQuery('biotech diabetes')">
+                                        <i class="fas fa-dna me-1"></i>Biotech Diabetes
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setQuery('pharmaceutical clinical trial')">
+                                        <i class="fas fa-flask me-1"></i>Pharma Trials
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setQuery('drug development')">
+                                        <i class="fas fa-capsules me-1"></i>Drug Development
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -203,14 +842,20 @@
             <!-- Progress Section -->
             <div class="progress-container" id="progressContainer">
                 <div class="spinner"></div>
-                <h4 id="progressText">Starting search...</h4>
-                <p class="text-muted">This may take a few moments while we search PubMed and analyze the results.</p>
+                <h4 id="progressText"><i class="fas fa-cog fa-spin me-2"></i>Starting search...</h4>
+                <p class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    This may take a few moments while we search PubMed and analyze the results for industry collaborations.
+                </p>
             </div>
 
             <!-- Results Section -->
             <div class="results-section" id="resultsSection" style="display: none;">
                 <!-- Summary will be inserted here -->
                 <div id="summaryContainer"></div>
+
+                <!-- Filter controls will be inserted here -->
+                <div id="filterContainer"></div>
 
                 <!-- Pagination controls will be inserted here -->
                 <div id="paginationContainer"></div>
@@ -221,6 +866,38 @@
                 <!-- Bottom pagination controls will be inserted here -->
                 <div id="bottomPaginationContainer"></div>
             </div>
+
+            <!-- Footer -->
+            <div class="footer text-center py-4" style="background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%); border-top: 1px solid #dee2e6;">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2"><i class="fas fa-info-circle me-1"></i>About</h6>
+                        <small class="text-muted">
+                            Powered by PubMed API<br>
+                            Industry author detection algorithm
+                        </small>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2"><i class="fas fa-chart-bar me-1"></i>Features</h6>
+                        <small class="text-muted">
+                            Real-time search & analysis<br>
+                            CSV export & pagination
+                        </small>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2"><i class="fas fa-lightbulb me-1"></i>Tips</h6>
+                        <small class="text-muted">
+                            Use company names for better results<br>
+                            Try "AND", "OR" for complex queries
+                        </small>
+                    </div>
+                </div>
+                <hr class="my-3" style="opacity: 0.3;">
+                <small class="text-muted">
+                    <i class="fas fa-heart text-danger me-1"></i>
+                    Built for researchers • Enhanced with AI-powered analysis
+                </small>
+            </div>
         </div>
     </div>
 
@@ -228,6 +905,10 @@
     <script>
         let currentSearchId = null;
         let statusCheckInterval = null;
+        let allPapers = [];
+        let currentFilter = 'all'; // 'all', 'industry', 'academic'
+        let currentPage = 1;
+        let currentPageSize = 15;
 
         document.getElementById('searchForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -236,6 +917,40 @@
 
         function setQuery(queryText) {
             document.getElementById('query').value = queryText;
+            // Add a subtle animation to show the query was set
+            const queryInput = document.getElementById('query');
+            queryInput.style.background = 'linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%)';
+            setTimeout(() => {
+                queryInput.style.background = 'white';
+            }, 1000);
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create a toast notification instead of alert
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} position-fixed`;
+            toast.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                animation: slideIn 0.3s ease-out;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            `;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'danger' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
+            `;
+            document.body.appendChild(toast);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 5000);
         }
 
         async function startSearch(page = 1) {
@@ -245,7 +960,8 @@
             const pageSize = parseInt(document.getElementById('pageSize').value);
 
             if (!query) {
-                alert('Please enter a search query');
+                showNotification('Please enter a search query to begin your research!', 'warning');
+                document.getElementById('query').focus();
                 return;
             }
 
@@ -279,7 +995,7 @@
                 }
             } catch (error) {
                 document.getElementById('progressContainer').style.display = 'none';
-                alert('Error: ' + error.message);
+                showNotification('Search Error: ' + error.message, 'danger');
             }
         }
 
@@ -299,7 +1015,7 @@
                     } else if (data.status === 'error') {
                         clearInterval(statusCheckInterval);
                         document.getElementById('progressContainer').style.display = 'none';
-                        alert('Search failed: ' + data.error);
+                        showNotification('Search failed: ' + data.error, 'danger');
                     } else {
                         // Continue checking
                         statusCheckInterval = setTimeout(checkSearchStatus, 2000);
@@ -310,7 +1026,7 @@
             } catch (error) {
                 clearInterval(statusCheckInterval);
                 document.getElementById('progressContainer').style.display = 'none';
-                alert('Error checking status: ' + error.message);
+                showNotification('Error checking status: ' + error.message, 'danger');
             }
         }
 
@@ -374,8 +1090,14 @@
             `;
             document.getElementById('summaryContainer').innerHTML = summaryHtml;
 
-            // Display pagination controls
-            displayPaginationControls(results.summary);
+            // Store all papers for filtering
+            allPapers = results.papers;
+
+            // Display filter controls
+            displayFilterControls(results.summary);
+
+            // Apply current filter and display results
+            applyFilter(currentFilter);
 
             // Display papers
             if (results.papers.length === 0) {
@@ -432,6 +1154,187 @@
                         <div class="mb-2">
                             <strong><i class="fas fa-envelope"></i> Corresponding Author:</strong> 
                             <a href="mailto:${paper.corresponding_email}">${paper.corresponding_email}</a>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('papersContainer').innerHTML = papersHtml;
+        }
+
+        function displayFilterControls(summary) {
+            const industryCount = allPapers.filter(paper => paper.has_industry_authors).length;
+            const academicCount = allPapers.length - industryCount;
+
+            const filterHtml = `
+                <div class="filter-container">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <h6 class="mb-0 me-3"><i class="fas fa-filter me-2"></i>Filter Results:</h6>
+                                <div class="filter-buttons">
+                                    <button class="filter-btn ${currentFilter === 'all' ? 'active all' : ''}" onclick="applyFilter('all')">
+                                        <i class="fas fa-list"></i>
+                                        All Papers
+                                    </button>
+                                    <button class="filter-btn ${currentFilter === 'industry' ? 'active industry' : ''}" onclick="applyFilter('industry')">
+                                        <i class="fas fa-building"></i>
+                                        Industry Only
+                                    </button>
+                                    <button class="filter-btn ${currentFilter === 'academic' ? 'active academic' : ''}" onclick="applyFilter('academic')">
+                                        <i class="fas fa-university"></i>
+                                        Academic Only
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="filter-stats">
+                                <div class="filter-stat">
+                                    <i class="fas fa-building text-success"></i>
+                                    <span class="badge bg-success">${industryCount}</span>
+                                    <small>Industry</small>
+                                </div>
+                                <div class="filter-stat">
+                                    <i class="fas fa-university text-secondary"></i>
+                                    <span class="badge bg-secondary">${academicCount}</span>
+                                    <small>Academic</small>
+                                </div>
+                                <div class="filter-stat">
+                                    <i class="fas fa-list text-primary"></i>
+                                    <span class="badge" style="background: var(--primary-gradient);">${allPapers.length}</span>
+                                    <small>Total</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('filterContainer').innerHTML = filterHtml;
+        }
+
+        function applyFilter(filterType) {
+            currentFilter = filterType;
+            currentPage = 1; // Reset to first page when filter changes
+
+            // Show loading state
+            document.getElementById('papersContainer').innerHTML = '<div class="text-center py-4 loading"><i class="fas fa-spinner fa-spin me-2"></i>Applying filter...</div>';
+
+            // Filter papers based on selection
+            let filteredPapers;
+            switch(filterType) {
+                case 'industry':
+                    filteredPapers = allPapers.filter(paper => paper.has_industry_authors);
+                    break;
+                case 'academic':
+                    filteredPapers = allPapers.filter(paper => !paper.has_industry_authors);
+                    break;
+                default:
+                    filteredPapers = allPapers;
+            }
+
+            // Update filter button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'all', 'industry', 'academic');
+            });
+            document.querySelector(`.filter-btn[onclick="applyFilter('${filterType}')"]`).classList.add('active', filterType);
+
+            // Create filtered results object
+            const filteredResults = {
+                papers: filteredPapers,
+                summary: {
+                    ...allPapers.summary || {},
+                    total_results: filteredPapers.length,
+                    current_page: currentPage,
+                    page_size: currentPageSize,
+                    total_pages: Math.max(1, Math.ceil(filteredPapers.length / currentPageSize)),
+                    start_index: 1,
+                    end_index: Math.min(currentPageSize, filteredPapers.length),
+                    has_previous: false,
+                    has_next: filteredPapers.length > currentPageSize
+                }
+            };
+
+            // Apply pagination to filtered results
+            const startIndex = (currentPage - 1) * currentPageSize;
+            const endIndex = Math.min(startIndex + currentPageSize, filteredPapers.length);
+            filteredResults.papers = filteredPapers.slice(startIndex, endIndex);
+            filteredResults.summary.start_index = startIndex + 1;
+            filteredResults.summary.end_index = endIndex;
+
+            // Display filtered and paginated results
+            displayPaginationControls(filteredResults.summary);
+            displayFilteredPapers(filteredResults.papers);
+
+            // Update URL
+            updateUrlParams({
+                query: document.getElementById('query').value,
+                page: currentPage,
+                page_size: currentPageSize,
+                filter: filterType,
+                email: document.getElementById('email').value || null,
+                debug: document.getElementById('debug').checked || null
+            });
+        }
+
+        function displayFilteredPapers(papers) {
+            if (papers.length === 0) {
+                const filterName = currentFilter === 'industry' ? 'industry' : currentFilter === 'academic' ? 'academic' : 'any';
+                document.getElementById('papersContainer').innerHTML = `
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i> <strong>No ${filterName.charAt(0).toUpperCase() + filterName.slice(1)} Papers Found</strong>
+                        <br>No papers matching your current filter criteria were found.
+                        <br><br><strong>💡 Try:</strong>
+                        <ul class="text-start mt-3">
+                            <li>Changing the filter to see all results</li>
+                            <li>Using different search terms</li>
+                            <li>Searching for broader topics</li>
+                        </ul>
+                    </div>
+                `;
+                return;
+            }
+
+            const papersHtml = papers.map(paper => `
+                <div class="card paper-card ${paper.has_industry_authors ? 'border-success' : 'border-secondary'} fade-in">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">
+                                <a href="https://pubmed.ncbi.nlm.nih.gov/${paper.pubmed_id}/" target="_blank" class="text-decoration-none">
+                                    ${paper.title}
+                                </a>
+                            </h5>
+                            <span class="badge ${paper.has_industry_authors ? 'bg-success' : 'bg-secondary'} ms-2">
+                                ${paper.has_industry_authors ? '🏢 Industry' : '🎓 Academic'}
+                            </span>
+                        </div>
+                        <p class="card-text">
+                            <strong><i class="fas fa-id-badge"></i> PubMed ID:</strong> ${paper.pubmed_id}<br>
+                            <strong><i class="fas fa-calendar"></i> Published:</strong> ${paper.publication_date}<br>
+                            <strong><i class="fas fa-book"></i> Journal:</strong> ${paper.journal}<br>
+                            <strong><i class="fas fa-users"></i> Authors:</strong> ${paper.total_authors} total${paper.industry_authors_count > 0 ? `, ${paper.industry_authors_count} industry` : ''}
+                        </p>
+
+                        ${paper.has_industry_authors ? `
+                        <div class="mb-2">
+                            <strong><i class="fas fa-user-tie"></i> Industry Authors:</strong><br>
+                            ${paper.industry_authors.map(author => `<span class="industry-badge">${author.name}</span>`).join('')}
+                        </div>
+                        ` : ''}
+
+                        ${paper.companies && paper.companies.length > 0 ? `
+                        <div class="mb-2">
+                            <strong><i class="fas fa-building"></i> Companies:</strong><br>
+                            ${paper.companies.map(company => `<span class="company-badge">${company}</span>`).join('')}
+                        </div>
+                        ` : ''}
+
+                        ${paper.corresponding_email ? `
+                        <div class="mb-0">
+                            <strong><i class="fas fa-envelope"></i> Contact:</strong>
+                            <a href="mailto:${paper.corresponding_email}" class="text-decoration-none">${paper.corresponding_email}</a>
                         </div>
                         ` : ''}
                     </div>
@@ -530,53 +1433,23 @@
         }
 
         async function changePage(page) {
-            if (!currentSearchId) return;
+            currentPage = page;
+            currentPageSize = parseInt(document.getElementById('pageSize').value);
 
-            try {
-                const pageSize = parseInt(document.getElementById('pageSize').value);
+            // Apply current filter with new page
+            applyFilter(currentFilter);
 
-                const response = await fetch(`/paginate/${currentSearchId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        page: page,
-                        page_size: pageSize
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    displayResults(data);
-
-                    // Update URL with current page and page size
-                    updateUrlParams({
-                        query: document.getElementById('query').value,
-                        page: page,
-                        page_size: pageSize,
-                        email: document.getElementById('email').value || null,
-                        debug: document.getElementById('debug').checked || null
-                    });
-
-                    // Scroll to top of results
-                    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    throw new Error('Failed to load page');
-                }
-            } catch (error) {
-                alert('Error loading page: ' + error.message);
-            }
+            // Scroll to top of results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
         }
 
         async function changePageSize(newPageSize) {
-            if (!currentSearchId) return;
-
             // Update the main page size selector
             document.getElementById('pageSize').value = newPageSize;
+            currentPageSize = parseInt(newPageSize);
 
             // Go to page 1 with new page size
-            await changePage(1);
+            changePage(1);
         }
 
         async function downloadResults() {
@@ -598,7 +1471,7 @@
                     throw new Error('Download failed');
                 }
             } catch (error) {
-                alert('Error downloading results: ' + error.message);
+                showNotification('Error downloading results: ' + error.message, 'danger');
             }
         }
 
@@ -621,6 +1494,7 @@
                 query: params.get('query'),
                 page: parseInt(params.get('page')) || 1,
                 page_size: parseInt(params.get('page_size')) || 15,
+                filter: params.get('filter') || 'all',
                 email: params.get('email'),
                 debug: params.get('debug') === 'true'
             };
@@ -638,6 +1512,11 @@
                 }
                 document.getElementById('debug').checked = urlParams.debug;
 
+                // Set filter and page state
+                currentFilter = urlParams.filter;
+                currentPage = urlParams.page;
+                currentPageSize = urlParams.page_size;
+
                 // Auto-start search if query is present
                 startSearch(urlParams.page);
             }
@@ -646,8 +1525,11 @@
         // Handle browser back/forward buttons
         window.addEventListener('popstate', function() {
             const urlParams = getUrlParams();
-            if (urlParams.query && currentSearchId) {
-                changePage(urlParams.page);
+            if (urlParams.query && currentSearchId && allPapers.length > 0) {
+                currentFilter = urlParams.filter;
+                currentPage = urlParams.page;
+                currentPageSize = urlParams.page_size;
+                applyFilter(currentFilter);
             }
         });
     </script>
