@@ -13,8 +13,8 @@ from datetime import datetime
 import threading
 import time
 
-# Add the current directory to the path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add the get-papers-list directory to the path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'get-papers-list'))
 
 from paper_finder.fetch import PubMedFetcher
 from paper_finder.parser import PubMedParser
@@ -27,6 +27,37 @@ CORS(app)
 # Global variable to store search results
 search_results = {}
 
+def enhance_search_query(original_query):
+    """
+    Enhance the search query to be more focused on industry collaborations.
+    """
+    # Industry-focused terms to add
+    industry_terms = [
+        "industry collaboration",
+        "pharmaceutical company",
+        "biotech",
+        "clinical trial",
+        "drug development",
+        "corporate research",
+        "commercial research"
+    ]
+
+    # Check if query already contains industry terms
+    query_lower = original_query.lower()
+    has_industry_terms = any(term in query_lower for term in [
+        'pharma', 'biotech', 'company', 'corp', 'inc', 'ltd',
+        'clinical trial', 'drug', 'therapeutic', 'industry'
+    ])
+
+    # If no industry terms, enhance the query
+    if not has_industry_terms:
+        # Add industry collaboration terms
+        enhanced = f"({original_query}) AND (industry[Affiliation] OR pharmaceutical[Affiliation] OR biotech[Affiliation] OR company[Affiliation] OR corp[Affiliation] OR clinical trial OR drug development)"
+        return enhanced
+    else:
+        # Query already has industry focus, just return original
+        return original_query
+
 @app.route('/')
 def index():
     """Main page of the web application."""
@@ -38,9 +69,11 @@ def search_papers():
     try:
         data = request.get_json()
         query = data.get('query', '').strip()
-        max_results = int(data.get('max_results', 15))
         email = data.get('email', '').strip() or None
         debug = data.get('debug', False)
+        page = int(data.get('page', 1))
+        page_size = int(data.get('page_size', 15))
+        # Search all available papers (no max_results limit)
         
         if not query:
             return jsonify({'error': 'Query is required'}), 400
@@ -59,7 +92,7 @@ def search_papers():
         # Start search in background thread
         thread = threading.Thread(
             target=perform_search,
-            args=(search_id, query, max_results, email, debug)
+            args=(search_id, query, email, debug, page, page_size)
         )
         thread.daemon = True
         thread.start()
@@ -69,7 +102,7 @@ def search_papers():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-def perform_search(search_id, query, max_results, email, debug):
+def perform_search(search_id, query, email, debug, page=1, page_size=15):
     """Perform the actual search in a background thread."""
     try:
         print(f"DEBUG: Starting search for query: {query}")
@@ -82,8 +115,14 @@ def perform_search(search_id, query, max_results, email, debug):
 
         # Step 1: Search PubMed
         search_results[search_id]['progress'] = 'Searching PubMed...'
-        print(f"DEBUG: Searching PubMed with query: {query}, max_results: {max_results}")
-        pubmed_ids = fetcher.search_papers(query, max_results)
+
+        # Enhance query to be more industry-focused
+        enhanced_query = enhance_search_query(query)
+        print(f"DEBUG: Original query: {query}")
+        print(f"DEBUG: Enhanced query: {enhanced_query}")
+        print(f"DEBUG: Searching PubMed with enhanced query (no limit)")
+        # Search without max_results limit to get all available papers
+        pubmed_ids = fetcher.search_papers(enhanced_query)
         print(f"DEBUG: Found {len(pubmed_ids)} PubMed IDs: {pubmed_ids[:5]}")
 
         if not pubmed_ids:
@@ -141,6 +180,10 @@ def perform_search(search_id, query, max_results, email, debug):
                 for j, author in enumerate(paper.authors[:3]):  # Check first 3 authors
                     is_industry = filter_obj.is_industry_affiliation(author)
                     print(f"DEBUG:   Author {j+1}: {author.first_name} {author.last_name} - Industry: {is_industry}")
+                    if author.affiliation:
+                        print(f"DEBUG:     Affiliation: {author.affiliation[:100]}...")
+                    if author.email:
+                        print(f"DEBUG:     Email: {author.email}")
 
         print(f"DEBUG: Found {len(papers_with_industry)} papers with industry authors out of {len(all_papers)} total")
         
@@ -148,7 +191,7 @@ def perform_search(search_id, query, max_results, email, debug):
         search_results[search_id]['progress'] = 'Preparing results...'
         print(f"DEBUG: Preparing results for {len(all_papers)} papers")
 
-        # Convert ALL papers to JSON-serializable format (not just those with industry authors)
+        # Convert ALL papers to JSON-serializable format
         results_data = []
         total_industry_authors = 0
 
@@ -156,14 +199,16 @@ def perform_search(search_id, query, max_results, email, debug):
             print(f"DEBUG: Processing paper {i+1}: {paper.pubmed_id}")
             industry_authors = filter_obj.identify_industry_authors(paper.authors)
             companies = filter_obj.get_company_affiliations(industry_authors)
+            has_industry = len(industry_authors) > 0
             total_industry_authors += len(industry_authors)
             print(f"DEBUG: Paper {paper.pubmed_id} has {len(industry_authors)} industry authors")
-            
+
             paper_data = {
                 'pubmed_id': paper.pubmed_id,
                 'title': paper.title,
                 'publication_date': paper.publication_date,
                 'journal': paper.journal,
+                'has_industry_authors': has_industry,
                 'industry_authors': [
                     {
                         'name': f"{author.last_name}, {author.first_name or author.initials}",
@@ -178,23 +223,41 @@ def perform_search(search_id, query, max_results, email, debug):
                 'industry_authors_count': len(industry_authors)
             }
             results_data.append(paper_data)
-        
-        # Create summary
+
+        # Apply pagination to results
+        total_results = len(results_data)
+        total_pages = max(1, (total_results + page_size - 1) // page_size)  # Ceiling division
+        start_index = (page - 1) * page_size
+        end_index = min(start_index + page_size, total_results)
+        paginated_results = results_data[start_index:end_index]
+
+        print(f"DEBUG: Pagination - Page {page} of {total_pages}, showing {len(paginated_results)} papers")
+
+        # Create summary with pagination info
         summary = {
             'total_papers': len(all_papers),
             'papers_with_industry': len(papers_with_industry),
             'total_industry_authors': total_industry_authors,
-            'papers_shown': len(results_data),  # All papers are now shown
+            'total_results': total_results,
+            'current_page': page,
+            'page_size': page_size,
+            'total_pages': total_pages,
+            'start_index': start_index + 1,  # 1-based for display
+            'end_index': end_index,
+            'has_previous': page > 1,
+            'has_next': page < total_pages,
             'query': query,
+            'enhanced_query': enhanced_query,
             'timestamp': datetime.now().isoformat()
         }
         
-        # Store final results
+        # Store final results with pagination
         search_results[search_id] = {
             'status': 'completed',
             'progress': 'Search completed successfully!',
             'results': {
-                'papers': results_data,
+                'papers': paginated_results,
+                'all_papers': results_data,  # Store all papers for pagination
                 'summary': summary
             },
             'error': None
@@ -216,6 +279,51 @@ def get_search_status(search_id):
     
     return jsonify(search_results[search_id])
 
+@app.route('/paginate/<search_id>', methods=['POST'])
+def paginate_results(search_id):
+    """Get a specific page of results without re-searching."""
+    try:
+        if search_id not in search_results:
+            return jsonify({'error': 'Search not found'}), 404
+
+        result = search_results[search_id]
+        if result['status'] != 'completed' or not result['results']:
+            return jsonify({'error': 'No results available'}), 404
+
+        data = request.get_json()
+        page = int(data.get('page', 1))
+        page_size = int(data.get('page_size', 15))
+
+        # Get all papers from stored results
+        all_papers = result['results']['all_papers']
+
+        # Apply pagination
+        total_results = len(all_papers)
+        total_pages = max(1, (total_results + page_size - 1) // page_size)
+        start_index = (page - 1) * page_size
+        end_index = min(start_index + page_size, total_results)
+        paginated_results = all_papers[start_index:end_index]
+
+        # Update summary with new pagination info
+        summary = result['results']['summary'].copy()
+        summary.update({
+            'current_page': page,
+            'page_size': page_size,
+            'total_pages': total_pages,
+            'start_index': start_index + 1,
+            'end_index': end_index,
+            'has_previous': page > 1,
+            'has_next': page < total_pages,
+        })
+
+        return jsonify({
+            'papers': paginated_results,
+            'summary': summary
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/download/<search_id>')
 def download_results(search_id):
     """Download search results as CSV."""
@@ -232,18 +340,20 @@ def download_results(search_id):
         filename = f"pubmed_results_{timestamp}.csv"
         filepath = os.path.join(os.getcwd(), filename)
         
-        # Convert results back to Paper objects for CSV export
-        # This is a simplified approach - in a real app you'd store the original objects
+        # Convert results to CSV format (all papers, not just current page)
         csv_data = []
-        for paper_data in result['results']['papers']:
+        all_papers = result['results'].get('all_papers', result['results']['papers'])
+        for paper_data in all_papers:
+            # Include all papers with industry status indicator
             row = {
                 'PubmedID': paper_data['pubmed_id'],
                 'Title': paper_data['title'],
                 'Publication Date': paper_data['publication_date'],
-                'Non-academic Author(s)': '; '.join([author['name'] for author in paper_data['industry_authors']]),
-                'Company Affiliation(s)': '; '.join(paper_data['companies']),
-                'Corresponding Author Email': paper_data['corresponding_email'] or '',
                 'Journal': paper_data['journal'],
+                'Has Industry Authors': 'Yes' if paper_data['has_industry_authors'] else 'No',
+                'Industry Authors': '; '.join([author['name'] for author in paper_data['industry_authors']]),
+                'Companies': '; '.join(paper_data['companies']),
+                'Corresponding Author Email': paper_data['corresponding_email'] or '',
                 'Total Authors': paper_data['total_authors'],
                 'Industry Authors Count': paper_data['industry_authors_count']
             }

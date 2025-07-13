@@ -61,7 +61,50 @@ class CSVExporter:
         if self.debug:
             print(f"Exported {len(csv_data)} papers to {output_file}")
             print(f"Columns: {list(df.columns)}")
-    
+
+    def export_all_papers(self, all_papers: List[Paper], papers_with_industry: List[Paper], output_file: str) -> None:
+        """
+        Export all papers to CSV file, indicating which have industry authors.
+
+        Args:
+            all_papers: List of all Paper objects
+            papers_with_industry: List of papers with industry authors
+            output_file: Path to output CSV file
+        """
+        if not all_papers:
+            print("No papers to export.")
+            return
+
+        # Create set of papers with industry authors for quick lookup
+        industry_paper_ids = {paper.pubmed_id for paper in papers_with_industry}
+
+        # Prepare data for CSV
+        csv_data = []
+
+        for paper in all_papers:
+            # Identify industry authors for this paper
+            industry_authors = self.filter.identify_industry_authors(paper.authors)
+            has_industry = paper.pubmed_id in industry_paper_ids
+
+            row_data = self._prepare_all_papers_row(paper, industry_authors, has_industry)
+            csv_data.append(row_data)
+
+        # Create DataFrame and export
+        df = pd.DataFrame(csv_data)
+
+        # Ensure output directory exists
+        os.makedirs(os.path.dirname(output_file) if os.path.dirname(output_file) else '.', exist_ok=True)
+
+        # Export to CSV
+        df.to_csv(output_file, index=False, encoding='utf-8')
+
+        industry_count = len(papers_with_industry)
+        total_count = len(all_papers)
+
+        if self.debug:
+            print(f"Exported {total_count} total papers to {output_file} ({industry_count} with industry authors)")
+            print(f"Columns: {list(df.columns)}")
+
     def _prepare_paper_row(self, paper: Paper, industry_authors: List[Author]) -> dict:
         """
         Prepare a single row of data for CSV export.
@@ -94,7 +137,46 @@ class CSVExporter:
             "Total Authors": len(paper.authors),
             "Industry Authors Count": len(industry_authors)
         }
-    
+
+    def _prepare_all_papers_row(self, paper: Paper, industry_authors: List[Author], has_industry: bool) -> dict:
+        """
+        Prepare a single row of data for all papers CSV export.
+
+        Args:
+            paper: Paper object
+            industry_authors: List of industry-affiliated authors
+            has_industry: Whether this paper has industry authors
+
+        Returns:
+            Dictionary containing row data
+        """
+        # Format non-academic authors
+        non_academic_authors = self._format_authors(industry_authors) if industry_authors else ""
+
+        # Get company affiliations
+        company_affiliations = self.filter.get_company_affiliations(industry_authors) if industry_authors else []
+        company_affiliations_str = "; ".join(company_affiliations)
+
+        # Find corresponding author email
+        corresponding_email = ""
+        for author in paper.authors:
+            if author.email:
+                corresponding_email = author.email
+                break
+
+        return {
+            "PubmedID": paper.pubmed_id,
+            "Title": paper.title,
+            "Publication Date": paper.publication_date,
+            "Has Industry Authors": "Yes" if has_industry else "No",
+            "Non-academic Author(s)": non_academic_authors,
+            "Company Affiliation(s)": company_affiliations_str,
+            "Corresponding Author Email": corresponding_email,
+            "Journal": paper.journal,
+            "Total Authors": len(paper.authors),
+            "Industry Authors Count": len(industry_authors)
+        }
+
     def _format_authors(self, authors: List[Author]) -> str:
         """
         Format author list for CSV output.
@@ -157,6 +239,46 @@ class CSVExporter:
 
         if self.debug:
             print(f"Displayed {len(csv_data)} papers to console")
+
+    def print_all_papers_to_console(self, all_papers: List[Paper], papers_with_industry: List[Paper]) -> None:
+        """
+        Print all papers to console in CSV format, highlighting those with industry authors.
+
+        Args:
+            all_papers: List of all Paper objects
+            papers_with_industry: List of papers with industry authors
+        """
+        if not all_papers:
+            print("No papers to display.")
+            return
+
+        # Create set of papers with industry authors for quick lookup
+        industry_paper_ids = {paper.pubmed_id for paper in papers_with_industry}
+
+        # Prepare data for console output
+        csv_data = []
+
+        for paper in all_papers:
+            # Identify industry authors for this paper
+            industry_authors = self.filter.identify_industry_authors(paper.authors)
+            has_industry = paper.pubmed_id in industry_paper_ids
+
+            row_data = self._prepare_all_papers_row(paper, industry_authors, has_industry)
+            csv_data.append(row_data)
+
+        # Create DataFrame and print to console
+        df = pd.DataFrame(csv_data)
+
+        # Print CSV header and data
+        print("\n" + "="*80)
+        print("ALL PAPERS RESULTS (CSV FORMAT)")
+        print("="*80)
+        print(df.to_csv(index=False, encoding='utf-8'))
+
+        industry_count = len(papers_with_industry)
+        total_count = len(all_papers)
+
+        print(f"\nDisplayed {total_count} papers to console ({industry_count} with industry authors)")
 
     def print_summary(self, papers: List[Paper]) -> None:
         """

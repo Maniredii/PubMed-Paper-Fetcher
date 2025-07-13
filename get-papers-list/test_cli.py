@@ -37,14 +37,14 @@ def test_help_option():
         returncode, stdout, stderr = run_command(f"python cli.py {help_flag}")
         
         if returncode != 0:
-            print(f"❌ Help option {help_flag} failed")
+            print(f"[FAIL] Help option {help_flag} failed")
             return False
         
         if "Usage:" not in stdout or "Options:" not in stdout:
-            print(f"❌ Help output missing required sections for {help_flag}")
+            print(f"[FAIL] Help output missing required sections for {help_flag}")
             return False
     
-    print("✅ Help option works correctly")
+    print("[PASS] Help option works correctly")
     return True
 
 
@@ -55,14 +55,14 @@ def test_required_arguments():
     returncode, stdout, stderr = run_command("python cli.py")
     
     if returncode == 0:
-        print("❌ CLI should fail when no query provided")
+        print("[FAIL] CLI should fail when no query provided")
         return False
-    
+
     if "Missing argument" not in stdout and "Missing argument" not in stderr:
-        print("❌ Missing proper error message for missing query")
+        print("[FAIL] Missing proper error message for missing query")
         return False
-    
-    print("✅ Required arguments validation works")
+
+    print("[PASS] Required arguments validation works")
     return True
 
 
@@ -78,15 +78,15 @@ def test_basic_functionality():
         returncode, stdout, stderr = run_command(cmd, timeout=60)
         
         if returncode != 0:
-            print(f"❌ Basic functionality test failed: {stderr}")
+            print(f"[FAIL] Basic functionality test failed: {stderr}")
             return False
-        
+
         # Check if output mentions the process
         if "PubMed Paper Finder" not in stdout:
-            print("❌ Missing expected output format")
+            print("[FAIL] Missing expected output format")
             return False
-    
-    print("✅ Basic functionality works")
+
+    print("[PASS] Basic functionality works")
     return True
 
 
@@ -98,14 +98,14 @@ def test_console_output():
     returncode, stdout, stderr = run_command(cmd, timeout=60)
     
     if returncode != 0:
-        print(f"❌ Console output test failed: {stderr}")
+        print(f"[FAIL] Console output test failed: {stderr}")
         return False
-    
+
     if "Output: Console" not in stdout:
-        print("❌ Console output not properly indicated")
+        print("[FAIL] Console output not properly indicated")
         return False
-    
-    print("✅ Console output works")
+
+    print("[PASS] Console output works")
     return True
 
 
@@ -117,14 +117,14 @@ def test_debug_mode():
     returncode, stdout, stderr = run_command(cmd, timeout=60)
     
     if returncode != 0:
-        print(f"❌ Debug mode test failed: {stderr}")
+        print(f"[FAIL] Debug mode test failed: {stderr}")
         return False
-    
+
     if "Debug mode enabled" not in stdout:
-        print("❌ Debug mode not properly indicated")
+        print("[FAIL] Debug mode not properly indicated")
         return False
-    
-    print("✅ Debug mode works")
+
+    print("[PASS] Debug mode works")
     return True
 
 
@@ -139,9 +139,9 @@ def test_all_options():
         returncode, stdout, stderr = run_command(cmd, timeout=60)
         
         if returncode != 0:
-            print(f"❌ Full options test failed: {stderr}")
+            print(f"[FAIL] Full options test failed: {stderr}")
             return False
-        
+
         # Check for expected output elements
         expected_elements = [
             "PubMed Paper Finder",
@@ -149,13 +149,13 @@ def test_all_options():
             "Max results: 2",
             "Debug mode enabled"
         ]
-        
+
         for element in expected_elements:
             if element not in stdout:
-                print(f"❌ Missing expected element: {element}")
+                print(f"[FAIL] Missing expected element: {element}")
                 return False
-    
-    print("✅ All options work correctly")
+
+    print("[PASS] All options work correctly")
     return True
 
 
@@ -169,10 +169,10 @@ def test_error_handling():
     
     # Should complete successfully even with no results
     if returncode not in [0, 1]:  # Allow exit code 1 for no results
-        print(f"❌ Error handling test failed unexpectedly: {stderr}")
+        print(f"[FAIL] Error handling test failed unexpectedly: {stderr}")
         return False
-    
-    print("✅ Error handling works")
+
+    print("[PASS] Error handling works")
     return True
 
 
@@ -200,19 +200,19 @@ def main():
             if test():
                 passed += 1
             else:
-                print(f"❌ Test {test.__name__} failed")
+                print(f"[FAIL] Test {test.__name__} failed")
         except Exception as e:
-            print(f"❌ Test {test.__name__} crashed: {e}")
-        
+            print(f"[FAIL] Test {test.__name__} crashed: {e}")
+
         print("-" * 40)
-    
+
     print(f"\nTEST RESULTS: {passed}/{total} tests passed")
-    
+
     if passed == total:
-        print("🎉 ALL TESTS PASSED - CLI is ready for automated evaluation!")
+        print("[SUCCESS] ALL TESTS PASSED - CLI is ready for automated evaluation!")
         return 0
     else:
-        print("❌ Some tests failed - please fix issues before submission")
+        print("[FAIL] Some tests failed - please fix issues before submission")
         return 1
 
 

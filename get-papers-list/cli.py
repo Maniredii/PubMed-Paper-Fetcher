@@ -6,7 +6,6 @@ CLI interface for the PubMed paper finder tool.
 import typer
 from typing import Optional
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 import sys
 import os
@@ -115,66 +114,62 @@ def search_papers(
         filter_obj = AffiliationFilter(debug=debug)
         exporter = CSVExporter(debug=debug)
         
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
-        ) as progress:
-            
-            # Step 1: Search PubMed
-            search_task = progress.add_task("Searching PubMed...", total=None)
-            
-            if debug:
-                console.print(f"[dim]Searching PubMed with query: {query}[/dim]")
-            
-            pubmed_ids = fetcher.search_papers(query, max_results)
-            progress.update(search_task, description=f"Found {len(pubmed_ids)} papers")
-            
-            if not pubmed_ids:
-                console.print("[red]No papers found for the given query.[/red]")
-                raise typer.Exit(1)
-            
-            if debug:
-                console.print(f"[dim]Found PubMed IDs: {pubmed_ids[:5]}{'...' if len(pubmed_ids) > 5 else ''}[/dim]")
-            
-            # Step 2: Fetch paper details
-            fetch_task = progress.add_task("Fetching paper details...", total=None)
-            
-            xml_responses = fetcher.fetch_papers_batch(pubmed_ids)
-            progress.update(fetch_task, description="Parsing paper data...")
-            
-            # Step 3: Parse papers
-            all_papers = []
-            for xml_response in xml_responses:
-                papers = parser.parse_papers(xml_response)
-                all_papers.extend(papers)
-            
-            progress.update(fetch_task, description=f"Parsed {len(all_papers)} papers")
-            
-            if debug:
-                console.print(f"[dim]Successfully parsed {len(all_papers)} papers[/dim]")
-            
-            # Step 4: Filter for industry authors
-            filter_task = progress.add_task("Filtering for industry authors...", total=None)
-            
-            papers_with_industry = filter_obj.filter_papers_with_industry_authors(all_papers)
-            progress.update(filter_task, description=f"Found {len(papers_with_industry)} papers with industry authors")
-            
-            # Step 5: Export results
-            export_task = progress.add_task("Exporting results...", total=None)
+        # Step 1: Search PubMed
+        console.print("Searching PubMed...")
 
-            if papers_with_industry:
-                if output_to_console:
-                    exporter.print_to_console(papers_with_industry)
-                else:
-                    exporter.export_papers(papers_with_industry, file)
+        if debug:
+            console.print(f"[dim]Searching PubMed with query: {query}[/dim]")
 
-                    if detailed:
-                        exporter.export_detailed_report(papers_with_industry, file)
+        pubmed_ids = fetcher.search_papers(query, max_results)
+        console.print(f"Found {len(pubmed_ids)} papers")
 
-                progress.update(export_task, description="Export complete")
+        if not pubmed_ids:
+            console.print("[red]No papers found for the given query.[/red]")
+            raise typer.Exit(1)
+
+        if debug:
+            console.print(f"[dim]Found PubMed IDs: {pubmed_ids[:5]}{'...' if len(pubmed_ids) > 5 else ''}[/dim]")
+
+        # Step 2: Fetch paper details
+        console.print("Fetching paper details...")
+
+        xml_responses = fetcher.fetch_papers_batch(pubmed_ids)
+        console.print("Parsing paper data...")
+
+        # Step 3: Parse papers
+        all_papers = []
+        for xml_response in xml_responses:
+            papers = parser.parse_papers(xml_response)
+            all_papers.extend(papers)
+
+        console.print(f"Parsed {len(all_papers)} papers")
+
+        if debug:
+            console.print(f"[dim]Successfully parsed {len(all_papers)} papers[/dim]")
+
+        # Step 4: Filter for industry authors
+        console.print("Filtering for industry authors...")
+
+        papers_with_industry = filter_obj.filter_papers_with_industry_authors(all_papers)
+        console.print(f"Found {len(papers_with_industry)} papers with industry authors")
+
+        # Step 5: Export results
+        console.print("Exporting results...")
+
+        if all_papers:
+            if output_to_console:
+                # Show all papers, highlighting those with industry authors
+                exporter.print_all_papers_to_console(all_papers, papers_with_industry)
             else:
-                progress.update(export_task, description="No papers to export")
+                # Export all papers with industry author indicators
+                exporter.export_all_papers(all_papers, papers_with_industry, file)
+
+                if detailed:
+                    exporter.export_detailed_report(papers_with_industry, file)
+
+            console.print("Export complete")
+        else:
+            console.print("No papers to export")
         
         # Display results summary
         console.print("\n" + "="*50)

@@ -29,7 +29,13 @@ class AffiliationFilter:
         'inc', 'incorporated', 'ltd', 'limited', 'llc', 'corp', 'corporation',
         'company', 'co.', 'gmbh', 'ag', 'sa', 'plc', 'pty', 'pvt',
         'biosciences', 'life sciences', 'research and development', 'r&d',
-        'drug discovery', 'clinical research', 'contract research'
+        'drug discovery', 'clinical research', 'contract research',
+        'clinical trial', 'clinical trials', 'drug development', 'drug design',
+        'medical device', 'diagnostics', 'laboratory services', 'consulting',
+        'solutions', 'technologies', 'systems', 'services', 'group',
+        'healthcare', 'health care', 'medical', 'clinical', 'trial',
+        'cro', 'contract research organization', 'pharmaceutical research',
+        'biomedical', 'medicine', 'therapy', 'treatment', 'device'
     }
     
     # Academic email domains
@@ -50,7 +56,19 @@ class AffiliationFilter:
         'moderna', 'biontech', 'illumina', 'thermo fisher', 'agilent',
         'waters', 'perkinelmer', 'danaher', 'abbott', 'medtronic',
         'boston scientific', 'stryker', 'zimmer biomet', 'intuitive surgical',
-        'eli lilly', 'takeda', 'boehringer ingelheim', 'bayer', 'celgene'
+        'eli lilly', 'takeda', 'boehringer ingelheim', 'bayer', 'celgene',
+        'iqvia', 'covance', 'parexel', 'psi', 'icon', 'syneos', 'ppd',
+        'quintiles', 'celerion', 'medpace', 'worldwide clinical trials',
+        'labcorp', 'quest diagnostics', 'eurofins', 'charles river',
+        'wuxi', 'catalent', 'lonza', 'samsung biologics', 'boehringer',
+        'teva', 'mylan', 'sandoz', 'hospira', 'fresenius', 'baxter',
+        # Private medical institutions and clinics
+        'mayo clinic', 'cleveland clinic', 'johns hopkins', 'kaiser permanente',
+        'memorial sloan kettering', 'md anderson', 'cedars-sinai', 'scripps',
+        'intermountain healthcare', 'geisinger', 'henry ford health',
+        # Research institutes with industry ties
+        'sarah cannon research institute', 'translational genomics research institute',
+        'broad institute', 'whitehead institute', 'cold spring harbor laboratory'
     }
     
     def __init__(self, debug: bool = False):
@@ -113,30 +131,34 @@ class AffiliationFilter:
     def is_industry_affiliation(self, author: Author) -> bool:
         """
         Determine if an author has an industry (non-academic) affiliation.
-        
+
         Args:
             author: Author object to evaluate
-            
+
         Returns:
             True if the author appears to have an industry affiliation
         """
         affiliation_text = author.affiliation.lower() if author.affiliation else ""
         email = author.email.lower() if author.email else ""
-        
+
         # Check email domain first (more reliable)
         email_score = self._score_email_domain(email)
-        
+
         # Check affiliation text
         affiliation_score = self._score_affiliation_text(affiliation_text)
-        
+
         # Combine scores with email having higher weight
         total_score = (email_score * 0.7) + (affiliation_score * 0.3)
-        
+
         if self.debug:
+            print(f"  Author: {author.first_name} {author.last_name}")
+            print(f"  Email: {email}")
+            print(f"  Affiliation: {affiliation_text}")
             print(f"  Email score: {email_score}, Affiliation score: {affiliation_score}, Total: {total_score}")
-        
+
         # Threshold for considering someone as industry-affiliated
-        return total_score > 0.5
+        # Lowered threshold to be more inclusive for industry collaborations
+        return total_score > 0.15
     
     def _score_email_domain(self, email: str) -> float:
         """
@@ -165,7 +187,9 @@ class AffiliationFilter:
         elif email_lower.endswith('.biz'):
             return 0.8
         elif email_lower.endswith('.org'):
-            return 0.2  # .org can be either
+            return 0.3  # .org can be either, slightly more industry-leaning
+        elif email_lower.endswith('.net'):
+            return 0.4  # .net often industry
         
         return 0.0
     
@@ -209,11 +233,11 @@ class AffiliationFilter:
         elif industry_count > 0 and academic_count == 0:
             return 0.8   # Clearly industry
         elif industry_count > academic_count:
-            return 0.5   # Probably industry
+            return 0.6   # Probably industry (increased from 0.5)
         elif academic_count > industry_count:
-            return -0.5  # Probably academic
+            return -0.4  # Probably academic (less negative to be more inclusive)
         else:
-            return 0.0   # Unclear/neutral
+            return 0.1   # Unclear/neutral (slightly positive to be more inclusive)
     
     def get_company_affiliations(self, authors: List[Author]) -> List[str]:
         """

@@ -32,14 +32,14 @@ class PubMedFetcher:
             params["email"] = self.email
         return params
     
-    def search_papers(self, query: str, max_results: int = 20) -> List[str]:
+    def search_papers(self, query: str, max_results: int = 1000) -> List[str]:
         """
         Search for papers using PubMed esearch API.
-        
+
         Args:
             query: Search query string
-            max_results: Maximum number of results to return
-            
+            max_results: Maximum number of results to return (default: 1000 for comprehensive search)
+
         Returns:
             List of PubMed IDs
         """

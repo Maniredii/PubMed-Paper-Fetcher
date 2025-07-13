@@ -181,26 +181,6 @@ python cli.py "pharmaceutical research" --max-results 100 --file pharma_research
 python cli.py "drug discovery" --max-results 5
 ```
 
-## Web Interface Features
-
-The web application provides an intuitive interface with the following features:
-
-### Search Options
-- **Flexible paper count**: Choose from 5, 10, 15, 20, 25, 50, or 100 papers
-- **Real-time progress**: Live updates during search and processing
-- **Debug mode**: Optional detailed logging for troubleshooting
-
-### Results Display
-- **Comprehensive statistics**: Shows papers requested, found, with industry authors, and displayed
-- **Industry author highlighting**: Clear badges for industry authors and companies
-- **Direct PubMed links**: Click paper titles to view on PubMed
-- **CSV download**: Export results for further analysis
-
-### Smart Filtering
-- **Only relevant papers shown**: Displays only papers with identified industry authors
-- **Exact counts**: Shows precise numbers of papers at each stage
-- **Company identification**: Highlights pharmaceutical and biotech companies
-
 ## Output Format
 
 The tool generates CSV files with the following columns:
@@ -255,14 +235,6 @@ This project was built using modern Python development tools and libraries:
 ### External APIs
 - **[NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25497/)**: PubMed search and retrieval API
 
-### Development Process
-The project was developed using standard software engineering practices:
-- Test-driven development with comprehensive unit tests
-- Modular architecture for maintainability
-- Type hints for code clarity and IDE support
-- Comprehensive documentation and examples
-- Git version control with meaningful commit messages
-
 ## Testing
 
 The project includes comprehensive tests to ensure reliability:
@@ -280,44 +252,6 @@ python test_cli.py
 # Run complete validation
 python validate_project.py
 ```
-
-## Troubleshooting
-
-### Common Issues
-
-**Issue**: `ModuleNotFoundError` when running the tool
-**Solution**: Make sure you're in the correct directory and dependencies are installed:
-```bash
-cd Aganitha-Test/get-papers-list
-pip install -r requirements.txt
-```
-
-**Issue**: `git clone` fails
-**Solution**: Ensure Git is installed and you have internet access:
-```bash
-git --version  # Should show Git version
-```
-
-**Issue**: Python version compatibility
-**Solution**: Check your Python version (requires 3.9+):
-```bash
-python --version  # Should be 3.9 or higher
-```
-
-**Issue**: API rate limiting or timeouts
-**Solution**: The tool includes built-in rate limiting, but for large queries, consider:
-- Using smaller `--max-results` values
-- Adding your email with `--email your@email.com`
-- Running queries during off-peak hours
-
-## Contributing
-
-This project follows standard Python development practices:
-- PEP 8 style guidelines
-- Type hints for all functions
-- Comprehensive docstrings
-- Unit tests for all modules
-- Clear commit messages
 
 ## License
 
