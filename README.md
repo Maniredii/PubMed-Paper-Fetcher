@@ -112,7 +112,7 @@ get-papers-list/
 ├── test_cli.py             # CLI integration tests
 └── validate_project.py     # Project validation script
 ```
-
+**use groq for llm**
 ### Module Responsibilities
 
 - **`cli.py`**: Main entry point providing the command-line interface using Typer framework
