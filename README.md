@@ -11,7 +11,7 @@
 
 ### 🔍 **Smart Search Capabilities**
 - **AI-Enhanced Queries**: Automatically improve search terms using Groq LLM
-- **Industry Focus**: Specifically targets papers with industry-academic collaborations
+- **Industry Focus**: Specifically targets papers with industry and academic collaborations
 - **Real-time Results**: Fast, responsive search with progress tracking
 - **Advanced Filtering**: Filter by industry involvement, publication date, and more
 
