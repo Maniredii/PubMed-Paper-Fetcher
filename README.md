@@ -1,5 +1,7 @@
 # 🧬 AI-Enhanced PubMed Research Discovery Platform
 
+*uses to fetch medical paper*
+
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-2.3+-green.svg)](https://flask.palletsprojects.com)
 [![Groq](https://img.shields.io/badge/Groq-LLM-orange.svg)](https://groq.com)
